@@ -1,6 +1,7 @@
 {
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "codespace",
+	"workspaceFolder": "/workspaces/conformitea",
 	"features": {
 		"ghcr.io/devcontainers-community/features/deno:1": {
 			"version": "latest"
