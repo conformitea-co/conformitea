@@ -1,5 +1,6 @@
 {
-	"image": "mcr.microsoft.com/devcontainers/universal:2",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "codespace",
 	"features": {
 		"ghcr.io/devcontainers-community/features/deno:1": {
 			"version": "latest"
