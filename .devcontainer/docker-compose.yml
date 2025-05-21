@@ -6,7 +6,7 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/conformitea
     volumes:
-      - ..:/workspace:cached
+      - ..:/workspaces/conformitea:cached
     command: sleep infinity
 
   postgres:
