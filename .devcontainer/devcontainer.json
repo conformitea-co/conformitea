@@ -1,6 +1,8 @@
 {
+	"name": "ConformiTea",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "codespace",
+	"forwardPorts": [5050],
 	"workspaceFolder": "/workspaces/conformitea",
 	"features": {
 		"ghcr.io/devcontainers-community/features/deno:1": {
