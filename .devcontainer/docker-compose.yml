@@ -2,13 +2,16 @@ name: conformitea-dev
 
 services:
   codespace:
-    image: "mcr.microsoft.com/devcontainers/universal:2"
+    image: mcr.microsoft.com/devcontainers/go:1
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/conformitea
     volumes:
-      - ..:/workspaces/conformitea:cached
+      - ..:/workspace:cached
+    command: sleep infinity
 
   postgres:
     image: postgres:17.5-bookworm
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
