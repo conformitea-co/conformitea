@@ -2,7 +2,9 @@
 	"name": "ConformiTea",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "codespace",
-	"forwardPorts": [5050],
+	"forwardPorts": [
+		5050
+	],
 	"portsAttributes": {
 		"5050": {
 			"label": "PGAdmin",
@@ -10,14 +12,11 @@
 		}
 	},
 	"features": {
-    "ghcr.io/devcontainers/features/aws-cli:1": {},
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-    "ghcr.io/devcontainers/features/go:1": {
-      "version": "1.24"
-    },
-		"ghcr.io/devcontainers-community/features/deno:1": {
-			"version": "latest"
+		"ghcr.io/devcontainers/features/go:1": {
+			"version": "1.24"
 		},
+		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/devcontainers-community/npm-features/prettier:1": {},
 		"ghcr.io/devcontainers-extra/features/fish-apt-get:1": {}
 	}
 }
