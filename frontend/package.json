@@ -1,0 +1,23 @@
+{
+  "name": "conformitea",
+  "version": "0.0.1",
+  "description": "Sit back and relax.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conformitea-co/conformitea.git"
+  },
+  "author": "Conformitea Co.",
+  "license": "Elastic-2.0",
+  "bugs": {
+    "url": "https://github.com/conformitea-co/conformitea/issues"
+  },
+  "homepage": "https://github.com/conformitea-co/conformitea#readme",
+  "devDependencies": {
+    "prettier": "3.5.3",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}
