@@ -9,7 +9,6 @@
 			"onAutoForward": "notify"
 		}
 	},
-	"workspaceFolder": "/workspace",
 	"features": {
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
