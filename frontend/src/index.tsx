@@ -1,3 +1,5 @@
+import "@fontsource/raleway/latin-800.css";
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 

@@ -1,7 +1,7 @@
 export default function App() {
   return (
     <div>
-      <h1>ConformiTea</h1>
+      <p className="text-2xl font-conformitea">ConformiTea</p>
       <p>Sit back and relax.</p>
     </div>
   );

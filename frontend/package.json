@@ -2,6 +2,7 @@
   "name": "conformitea",
   "version": "0.0.1",
   "description": "Sit back and relax.",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -20,6 +21,7 @@
   "homepage": "https://github.com/conformitea-co/conformitea#readme",
   "devDependencies": {
     "@eslint/js": "^9.27.0",
+    "@types/node": "^22.15.21",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@vitejs/plugin-react": "^4.4.1",
@@ -36,7 +38,9 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.7",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.7"
   }
 }
