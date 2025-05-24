@@ -1,3 +1,4 @@
+import importPlugin from "eslint-plugin-import";
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -10,12 +11,26 @@ export default defineConfig([
   // Main source files (type-aware linting)
   {
     files: ["src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-    plugins: { js, "react-refresh": reactRefresh, "react-hooks": reactHooks },
+    plugins: {
+      js,
+      "react-refresh": reactRefresh,
+      "react-hooks": reactHooks,
+      import: importPlugin,
+    },
     extends: [
       js.configs.recommended,
       ...tseslint.configs.strictTypeChecked,
       pluginReact.configs.flat.recommended,
+      "plugin:import/recommended",
+      "plugin:import/typescript",
     ],
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: "./tsconfig.app.json",
+        },
+      },
+    },
     languageOptions: {
       globals: globals.browser,
       parserOptions: {
@@ -36,9 +51,9 @@ export default defineConfig([
     files: ["*.config.{js,ts,mjs}"],
     extends: [js.configs.recommended],
     languageOptions: {
-    globals: {
-      ...globals.node,
+      globals: {
+        ...globals.node,
+      },
     },
-  },
   },
 ]);
