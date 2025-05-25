@@ -1,3 +1,6 @@
+import { toast } from "sonner";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,8 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
-import { useState } from "react";
+import { ThemeModeToggle } from "@/components/theme-mode-toggle";
 
 export default function Brand() {
   const [inputValue, setInputValue] = useState("");
@@ -25,13 +27,13 @@ export default function Brand() {
             className="mx-auto h-16 w-16 mb-2"
           />
           <h1 className="text-4xl font-extrabold tracking-tight">
-            Conformitea UI Theme
+            Conformi<span className="text-tea ml-[1px]">Tea</span> UI Theme
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
             A modern, minimal, and accessible UI theme. Built to be easy on the
-            eyes, with clear primary, accent, and destructive colors that work
-            with your brand.
+            eyes, with clear primary, accent, and destructive colors.
           </p>
+          <ThemeModeToggle />
         </section>
 
         {/* Color Palette Showcase */}
