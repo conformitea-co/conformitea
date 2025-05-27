@@ -1,17 +1,14 @@
 import { defineConfig, searchForWorkspaceRoot } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from "@tailwindcss/vite";
+import { reactRouter } from "@react-router/dev/vite";
 import path from "path";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [tailwindcss(), reactRouter()],
   server: {
     fs: {
-      allow: [
-        searchForWorkspaceRoot(process.cwd()),
-        "../node_modules",
-      ],
-    }
+      allow: [searchForWorkspaceRoot(process.cwd()), "../node_modules"],
+    },
   },
   resolve: {
     alias: {

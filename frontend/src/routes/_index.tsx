@@ -1,4 +1,4 @@
-export default function App() {
+export default function Index() {
   return (
     <div>
       <p className="text-2xl font-conformitea">ConformiTea</p>
