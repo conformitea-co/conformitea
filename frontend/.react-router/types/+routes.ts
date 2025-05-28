@@ -13,6 +13,9 @@ type Pages = {
   "/": {
     params: {};
   };
+  "/auth/signup": {
+    params: {};
+  };
   "/brand": {
     params: {};
   };
@@ -21,7 +24,11 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/brand";
+    page: "/" | "/auth/signup" | "/brand";
+  };
+  "routes/auth.signup/route.tsx": {
+    id: "routes/auth.signup";
+    page: "/auth/signup";
   };
   "routes/_index.tsx": {
     id: "routes/_index";
