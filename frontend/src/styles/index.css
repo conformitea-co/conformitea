@@ -115,3 +115,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .header-sm {
+    @apply font-conformitea text-2xl font-bold;
+  }
+
+  .header-md {
+    @apply font-conformitea text-3xl font-bold;
+  }
+
+  .header-lg {
+    @apply font-conformitea text-4xl font-bold;
+  }
+}
