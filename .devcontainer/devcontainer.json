@@ -1,6 +1,6 @@
 {
   "name": "ConformiTea",
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "/workspaces",
   "dockerComposeFile": "docker-compose.yml",
   "service": "codespace",
   "forwardPorts": [5050],

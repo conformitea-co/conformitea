@@ -11,6 +11,8 @@ urls:
 secrets:
   system:
     - youReallyNeedToChangeThis
+  cookie:
+    - youReallyNeedToChangeThis
 
 oidc:
   subject_identifiers:
