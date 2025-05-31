@@ -1,5 +1,7 @@
 .env
 .DS_Store
 
+hydra.yml
+
 node_modules
 dist
