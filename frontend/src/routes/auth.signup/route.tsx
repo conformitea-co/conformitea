@@ -4,6 +4,16 @@ import { FaMicrosoft } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 
 export default function Signup() {
+  const onMicrosoftSignUp = () => {
+    window.location.href = `${import.meta.env.VITE_API_URL}/oauth2/auth?` + new URLSearchParams({
+      client_id: "microsoft",
+      response_type: "code",
+      redirect_uri: `${import.meta.env.VITE_API_URL}/auth/callback`,
+      scope: "openid offline_access",
+      state: Math.random().toString(36).substring(2, 15)
+    });
+  };
+
   return (
     <div className="flex flex-1 flex-row items-center justify-center mx-auto h-screen gap-3 p-7 max-w-7xl">
       <div className="flex flex-1 flex-col w-full h-full justify-center items-center gap-6">
@@ -26,7 +36,7 @@ export default function Signup() {
             <FaGoogle className="mr-1" />
             Sign up with Google
           </Button>
-          <Button className="w-full" variant="outline" size="lg">
+          <Button className="w-full" variant="outline" size="lg" onClick={onMicrosoftSignUp}>
             <FaMicrosoft className="mr-1" />
             Sign up with Microsoft
           </Button>

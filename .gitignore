@@ -1,6 +1,7 @@
 .env
 .DS_Store
 
+conformitea.toml
 hydra.yml
 
 node_modules
