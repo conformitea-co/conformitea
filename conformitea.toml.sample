@@ -1,2 +1,19 @@
 [redis]
 address = "localhost:6379"
+user = "redis"
+password = "redis"
+
+[session]
+cookie_name = "conformitea_session"
+
+# key_pairs are used for session cookie authentication (signing) and encryption.
+# The first key is for signing, the second (optional) for encryption, and
+# additional pairs allow for key rotation.
+key_pairs = [
+    "your_signing_key_here",
+    "your_encryption_key_here",
+]
+
+# Idle time in seconds after which the session cookie expires and the session is
+# invalidated.
+timeout = 3600

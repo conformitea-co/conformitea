@@ -1,9 +1,15 @@
 package middlewares
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterMiddlewares(router *gin.Engine) {
-	SessionManagement(router)
+	sessionMiddleware, err := SessionMiddleware()
+	if err != nil {
+		log.Fatalf("failed to initialize session middleware: %v", err)
+	}
+	router.Use(sessionMiddleware)
 }
