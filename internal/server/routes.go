@@ -8,7 +8,12 @@ import (
 )
 
 func RegisterRoutes(router *gin.Engine) {
+	// Authentication routes
 	router.GET("/auth/login", auth.Login)
+	router.GET("/auth/callback", auth.Callback)
+	router.GET("/auth/me", auth.Me)
+	router.POST("/auth/logout", auth.Logout)
 
+	// Health check
 	router.GET("/ping", handlers.Ping)
 }
