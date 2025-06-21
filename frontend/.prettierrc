@@ -1,4 +1,14 @@
 {
   "tabWidth": 2,
-  "useTabs": false
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "plugins": [
+    "prettier-plugin-tailwindcss",
+    "@trivago/prettier-plugin-sort-imports"
+  ],
+  "printWidth": 110,
+  "importOrder": ["^@\/types/(.*)$", "^@/hooks/(.*)$", "^@/stores/(.*)$", "^@/lib/(.*)$", "^@/components/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }

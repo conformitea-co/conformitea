@@ -1,8 +1,11 @@
-import { Outlet, Scripts, ScrollRestoration } from "react-router";
-
-import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/index.css";
-import { ThemeModeToggle } from "./components/theme-mode-toggle";
+import { Outlet, Scripts, ScrollRestoration } from "react-router";
+import { SWRConfig } from "swr";
+
+import { fetcher } from "@/lib/api";
+
+import { ThemeModeToggle } from "@/components/theme-mode-toggle";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function Root() {
   return (
@@ -13,12 +16,20 @@ export default function Root() {
         <title>ConformiTea</title>
       </head>
       <body>
-        <ThemeProvider defaultTheme="system" storageKey="conformitea-theme">
-          <ThemeModeToggle className="fixed top-4 right-4 z-50" />
-          <div id="root">
-            <Outlet />
-          </div>
-        </ThemeProvider>
+        <SWRConfig
+          value={{
+            fetcher,
+            revalidateOnFocus: true,
+            revalidateOnReconnect: true,
+          }}
+        >
+          <ThemeProvider defaultTheme="system" storageKey="conformitea-theme">
+            <ThemeModeToggle className="fixed top-4 right-4 z-50" />
+            <div id="root">
+              <Outlet />
+            </div>
+          </ThemeProvider>
+        </SWRConfig>
         <ScrollRestoration />
         <Scripts />
       </body>

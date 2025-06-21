@@ -6,3 +6,5 @@ hydra.yml
 
 node_modules
 dist
+
+memory-bank
