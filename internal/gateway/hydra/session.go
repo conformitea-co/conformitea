@@ -28,9 +28,10 @@ func NewClient(adminURL string) *Client {
 
 // LoginSession represents a Hydra OAuth2 login session request.
 type LoginSession struct {
-	Challenge      string   `json:"challenge"`
-	ClientID       string   `json:"client"`
-	RequestedAt    string   `json:"requested_at"`
+	Challenge string `json:"challenge"`
+	Client    struct {
+		ClientId string `json:"client_id"`
+	} `json:"client"`
 	RequestURL     string   `json:"request_url"`
 	Skip           bool     `json:"skip"`
 	Subject        string   `json:"subject"`

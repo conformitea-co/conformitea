@@ -27,6 +27,7 @@ func generateNonce() (string, error) {
 func Login(c *gin.Context) {
 	// Extract login_challenge from Hydra
 	loginChallenge := c.Query("login_challenge")
+
 	if loginChallenge == "" {
 		authErr := cerror.NewAuthError(cerror.AuthInvalidState, map[string]interface{}{
 			"parameter": "login_challenge",
@@ -48,7 +49,7 @@ func Login(c *gin.Context) {
 	}
 
 	// Determine IdP based on client_id
-	provider := loginSession.ClientID
+	provider := loginSession.Client.ClientId
 	if provider != "microsoft" {
 		authErr := cerror.NewAuthError(cerror.AuthProviderNotSupported, map[string]interface{}{
 			"provider": provider,
@@ -80,7 +81,7 @@ func Login(c *gin.Context) {
 	microsoftConfig := microsoft.Config{
 		ClientID:     viper.GetString("oauth.microsoft.client_id"),
 		ClientSecret: viper.GetString("oauth.microsoft.client_secret"),
-		RedirectURL:  "http://localhost:8080/auth/callback",
+		RedirectURL:  viper.GetString("oauth.microsoft.redirect_url"),
 		Scopes:       viper.GetStringSlice("oauth.microsoft.scopes"),
 	}
 	microsoftClient := microsoft.NewClient(microsoftConfig)

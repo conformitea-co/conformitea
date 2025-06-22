@@ -146,8 +146,8 @@ func handleMicrosoftCallback(c *gin.Context) {
 		return
 	}
 
-	// Redirect to frontend dashboard
-	c.Redirect(http.StatusFound, "http://localhost:3000/")
+	// Redirect to frontend
+	c.Redirect(http.StatusFound, viper.GetString("general.frontend_url"))
 }
 
 // getEmailFromProfile extracts email from Microsoft user profile with fallback.

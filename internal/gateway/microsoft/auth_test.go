@@ -2,7 +2,6 @@ package microsoft
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -183,6 +182,7 @@ func TestClient_GetUserProfile(t *testing.T) {
 		statusCode      int
 		expectError     bool
 		expectedProfile *UserProfile
+		errorContains   string
 	}{
 		{
 			name: "successful profile retrieval",
@@ -206,21 +206,45 @@ func TestClient_GetUserProfile(t *testing.T) {
 			},
 		},
 		{
-			name:           "graph API error",
+			name:           "unauthorized error",
+			serverResponse: `{"error": {"code": "Unauthorized", "message": "Invalid token"}}`,
+			statusCode:     401,
+			expectError:    true,
+			errorContains:  "microsoft Graph API error: status 401",
+		},
+		{
+			name:           "forbidden error",
 			serverResponse: `{"error": {"code": "Forbidden", "message": "Insufficient privileges"}}`,
 			statusCode:     403,
 			expectError:    true,
+			errorContains:  "microsoft Graph API error: status 403",
 		},
 		{
-			name:           "invalid JSON response",
+			name:           "not found error",
+			serverResponse: `{"error": {"code": "NotFound", "message": "User not found"}}`,
+			statusCode:     404,
+			expectError:    true,
+			errorContains:  "microsoft Graph API error: status 404",
+		},
+		{
+			name:           "internal server error",
+			serverResponse: `{"error": {"code": "InternalServerError", "message": "Something went wrong"}}`,
+			statusCode:     500,
+			expectError:    true,
+			errorContains:  "microsoft Graph API error: status 500",
+		},
+		{
+			name:           "invalid JSON response with 200 status",
 			serverResponse: `invalid json`,
 			statusCode:     200,
 			expectError:    true,
+			errorContains:  "failed to decode user profile",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Create a test server that mimics Microsoft Graph API
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != "GET" {
 					t.Errorf("Expected GET method, got %s", r.Method)
@@ -243,6 +267,7 @@ func TestClient_GetUserProfile(t *testing.T) {
 			}))
 			defer server.Close()
 
+			// Create client with test configuration
 			config := Config{
 				ClientID:     "test-client-id",
 				ClientSecret: "test-client-secret",
@@ -258,59 +283,50 @@ func TestClient_GetUserProfile(t *testing.T) {
 				TokenType:   "Bearer",
 			}
 
-			// Override the Microsoft Graph URL for testing
-			originalClient := client.config.Client(context.Background(), token)
-			testClient := &http.Client{
-				Transport: &testTransport{
-					baseURL: server.URL,
-					wrapped: originalClient.Transport,
+			// Override the oauth2 config to use our test server
+			// We need to create a custom HTTP client that redirects Graph API calls to our test server
+			ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
+				Transport: &graphAPITestTransport{
+					testServerURL: server.URL,
 				},
-			}
+			})
 
-			// Create a temporary client with test transport
-			testConfig := client.config
-			testConfig.Endpoint = oauth2.Endpoint{
-				AuthURL:  "http://test-auth",
-				TokenURL: "http://test-token",
-			}
-
-			// Mock the HTTP client call
-			ctx := context.Background()
-			req, _ := http.NewRequestWithContext(ctx, "GET", server.URL+"/v1.0/me", nil)
-			req.Header.Set("Authorization", "Bearer test-access-token")
-
-			resp, err := testClient.Do(req)
-			if err != nil && !tt.expectError {
-				t.Errorf("Unexpected HTTP error: %v", err)
-				return
-			}
+			// Call the actual method we're testing
+			profile, err := client.GetUserProfile(ctx, token)
 
 			if tt.expectError {
-				if err == nil && resp != nil && resp.StatusCode == 200 {
-					t.Error("Expected error but got successful response")
+				if err == nil {
+					t.Error("Expected error, got nil")
+				} else if tt.errorContains != "" && !strings.Contains(err.Error(), tt.errorContains) {
+					t.Errorf("Expected error containing %q, got %q", tt.errorContains, err.Error())
 				}
 				return
 			}
 
-			defer resp.Body.Close()
-
-			if resp.StatusCode != 200 {
-				t.Errorf("Expected status 200, got %d", resp.StatusCode)
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
 				return
 			}
 
-			var profile UserProfile
-			if err := json.NewDecoder(resp.Body).Decode(&profile); err != nil {
-				t.Errorf("Failed to decode response: %v", err)
-				return
-			}
-
+			// Verify the returned profile matches expectations
 			if profile.ID != tt.expectedProfile.ID {
 				t.Errorf("ID = %v, want %v", profile.ID, tt.expectedProfile.ID)
 			}
 
 			if profile.DisplayName != tt.expectedProfile.DisplayName {
 				t.Errorf("DisplayName = %v, want %v", profile.DisplayName, tt.expectedProfile.DisplayName)
+			}
+
+			if profile.GivenName != tt.expectedProfile.GivenName {
+				t.Errorf("GivenName = %v, want %v", profile.GivenName, tt.expectedProfile.GivenName)
+			}
+
+			if profile.Surname != tt.expectedProfile.Surname {
+				t.Errorf("Surname = %v, want %v", profile.Surname, tt.expectedProfile.Surname)
+			}
+
+			if profile.UserPrincipalName != tt.expectedProfile.UserPrincipalName {
+				t.Errorf("UserPrincipalName = %v, want %v", profile.UserPrincipalName, tt.expectedProfile.UserPrincipalName)
 			}
 
 			if profile.Mail != tt.expectedProfile.Mail {
@@ -320,24 +336,25 @@ func TestClient_GetUserProfile(t *testing.T) {
 	}
 }
 
-// testTransport is a helper for testing HTTP calls
-type testTransport struct {
-	baseURL string
-	wrapped http.RoundTripper
+// graphAPITestTransport is a simple transport that redirects Microsoft Graph API calls to our test server
+type graphAPITestTransport struct {
+	testServerURL string
 }
 
-func (t *testTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// Replace Microsoft Graph URL with test server URL
-	if strings.Contains(req.URL.String(), "graph.microsoft.com") {
-		req.URL.Host = strings.TrimPrefix(t.baseURL, "http://")
+func (t *graphAPITestTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// If this is a Graph API request, redirect to our test server
+	if strings.Contains(req.URL.Host, "graph.microsoft.com") {
+		// Parse the test server URL
+		testURL := strings.TrimPrefix(t.testServerURL, "http://")
+		testURL = strings.TrimPrefix(testURL, "https://")
+
+		// Update the request to point to our test server
 		req.URL.Scheme = "http"
-		req.URL.Path = strings.Replace(req.URL.Path, "/v1.0/me", "/v1.0/me", 1)
+		req.URL.Host = testURL
+		// Keep the same path (/v1.0/me)
 	}
 
-	if t.wrapped != nil {
-		return t.wrapped.RoundTrip(req)
-	}
-
+	// Use the default transport to actually make the request
 	return http.DefaultTransport.RoundTrip(req)
 }
 

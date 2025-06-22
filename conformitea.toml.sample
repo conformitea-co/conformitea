@@ -1,3 +1,6 @@
+[general]
+frontend_url = "http://localhost:5173"
+
 [redis]
 address = "localhost:6379"
 user = "redis"
@@ -17,3 +20,13 @@ key_pairs = [
 # Idle time in seconds after which the session cookie expires and the session is
 # invalidated.
 timeout = 3600
+
+[hydra]
+admin_url = "http://hydra:4445"
+public_url = "http://hydra:4444"
+
+[oauth.microsoft]
+client_id = "your_microsoft_client_id"
+client_secret = "your_microsoft_client_secret"
+redirect_url = "http://localhost:8080/auth/callback"
+scopes = ["openid", "profile", "email"]

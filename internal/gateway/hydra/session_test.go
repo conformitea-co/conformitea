@@ -40,7 +40,7 @@ func TestClient_GetLoginSession(t *testing.T) {
 			challenge: "test-challenge-123",
 			serverResponse: `{
 				"challenge": "test-challenge-123",
-				"client": "microsoft",
+				"client": { "client_id": "microsoft" },
 				"requested_at": "2025-01-01T00:00:00Z",
 				"request_url": "http://localhost:4444/oauth2/auth",
 				"skip": false,
@@ -50,9 +50,12 @@ func TestClient_GetLoginSession(t *testing.T) {
 			statusCode:  200,
 			expectError: false,
 			expectedSession: &LoginSession{
-				Challenge:      "test-challenge-123",
-				ClientID:       "microsoft",
-				RequestedAt:    "2025-01-01T00:00:00Z",
+				Challenge: "test-challenge-123",
+				Client: struct {
+					ClientId string `json:"client_id"`
+				}{
+					ClientId: "microsoft",
+				},
 				RequestURL:     "http://localhost:4444/oauth2/auth",
 				Skip:           false,
 				Subject:        "user123",
@@ -112,8 +115,8 @@ func TestClient_GetLoginSession(t *testing.T) {
 				t.Errorf("Challenge = %v, want %v", session.Challenge, tt.expectedSession.Challenge)
 			}
 
-			if session.ClientID != tt.expectedSession.ClientID {
-				t.Errorf("ClientID = %v, want %v", session.ClientID, tt.expectedSession.ClientID)
+			if session.Client.ClientId != tt.expectedSession.Client.ClientId {
+				t.Errorf("ClientID = %v, want %v", session.Client.ClientId, tt.expectedSession.Client.ClientId)
 			}
 
 			if len(session.RequestedScope) != len(tt.expectedSession.RequestedScope) {

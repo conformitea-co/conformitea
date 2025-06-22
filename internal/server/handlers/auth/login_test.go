@@ -104,7 +104,9 @@ func TestLogin_UnsupportedProvider(t *testing.T) {
 		if strings.Contains(r.URL.Path, "/admin/oauth2/auth/requests/login") {
 			response := `{
 				"challenge": "test-challenge",
-				"client": "google",
+				"client": {
+					"client_id": "google"
+				},
 				"requested_at": "2025-01-01T00:00:00Z",
 				"request_url": "http://localhost:4444/oauth2/auth",
 				"skip": false,
@@ -157,7 +159,9 @@ func TestLogin_SuccessfulMicrosoftRedirect(t *testing.T) {
 
 			response := `{
 				"challenge": "microsoft-challenge",
-				"client": "microsoft",
+				"client": {
+					"client_id": "microsoft"
+				},
 				"requested_at": "2025-01-01T00:00:00Z",
 				"request_url": "http://localhost:4444/oauth2/auth",
 				"skip": false,
@@ -235,7 +239,9 @@ func TestLogin_SessionStorage(t *testing.T) {
 		if strings.Contains(r.URL.Path, "/admin/oauth2/auth/requests/login") {
 			response := `{
 				"challenge": "test-challenge",
-				"client": "microsoft",
+				"client": {
+					"client_id": "microsoft"
+				},
 				"requested_at": "2025-01-01T00:00:00Z",
 				"request_url": "http://localhost:4444/oauth2/auth",
 				"skip": false,

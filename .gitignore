@@ -1,5 +1,6 @@
 .env
 .DS_Store
+.vscode
 
 conformitea.toml
 hydra.yml

@@ -12,7 +12,7 @@ export default function Signup() {
         client_id: "microsoft",
         response_type: "code",
         redirect_uri: `${import.meta.env.VITE_API_URL}/auth/callback`,
-        scope: "openid offline_access",
+        scope: "openid profile email",
         state: Math.random().toString(36).substring(2, 15),
       });
   };
