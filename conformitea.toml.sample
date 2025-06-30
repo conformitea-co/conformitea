@@ -30,3 +30,15 @@ client_id = "your_microsoft_client_id"
 client_secret = "your_microsoft_client_secret"
 redirect_url = "http://localhost:8080/auth/callback"
 scopes = ["openid", "profile", "email"]
+
+[logger]
+# Log level: debug, info, warn, error
+level = "info"
+
+# Log format: json or console
+# Use "console" for development (colored output)
+# Use "json" for production (structured logs)
+format = "json"
+
+# Log output: stdout, stderr, or file path
+output = "stdout"
