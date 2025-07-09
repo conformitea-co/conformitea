@@ -1,12 +1,10 @@
 [general]
 frontend_url = "http://localhost:5173"
 
-[redis]
-address = "localhost:6379"
-user = "redis"
-password = "redis"
+[server]
+port = "8080"
 
-[session]
+[server.session]
 cookie_name = "conformitea_session"
 
 # key_pairs are used for session cookie authentication (signing) and encryption.
@@ -20,6 +18,11 @@ key_pairs = [
 # Idle time in seconds after which the session cookie expires and the session is
 # invalidated.
 timeout = 3600
+
+[redis]
+address = "localhost:6379"
+user = "redis"
+password = "redis"
 
 [hydra]
 admin_url = "http://hydra:4445"
