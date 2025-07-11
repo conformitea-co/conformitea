@@ -1,5 +1,5 @@
 package types
 
-type PublicServer interface {
+type Server interface {
 	Start() error
 }

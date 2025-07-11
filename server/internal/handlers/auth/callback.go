@@ -4,18 +4,17 @@ import (
 	"context"
 	"net/http"
 
-	cftConfig "conformitea/server/config"
+	"conformitea/server/internal/config"
 	cftError "conformitea/server/internal/error"
-	"conformitea/server/internal/gateway/hydra"
-	"conformitea/server/internal/gateway/microsoft"
+	"conformitea/server/internal/gateways/hydra"
+	"conformitea/server/internal/gateways/microsoft"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 // Handles OAuth2 callbacks from identity providers and completes the Hydra flow.
-func Callback(c *gin.Context, logger *zap.Logger) {
+func Callback(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
 
@@ -158,14 +157,13 @@ func handleMicrosoftCallback(c *gin.Context, authContext map[string]string) {
 		return
 	}
 
-	config, err := cftConfig.GetConfig()
 	if err != nil {
 		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthHydraClientInit, err.Error(), nil)
 		c.JSON(authErr.HTTPStatusCode(), authErr)
 		return
 	}
 
-	c.Redirect(http.StatusFound, config.General.FrontendURL)
+	c.Redirect(http.StatusFound, config.GetConfig().General.FrontendURL)
 }
 
 // Extracts email from Microsoft user profile with fallback.

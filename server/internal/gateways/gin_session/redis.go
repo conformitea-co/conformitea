@@ -3,19 +3,21 @@ package gin_session
 import (
 	"net/http"
 
-	"conformitea/server/config"
+	"conformitea/server/internal/config"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 )
 
-func ProvideRedisStore(redisConfig config.RedisConfig, httpServerConfig config.HTTPServerConfig) (sessions.Store, error) {
+func NewStore() (sessions.Store, error) {
+	config := config.GetConfig()
+
 	var keyBytes [][]byte
-	for _, k := range httpServerConfig.Session.KeyPairs {
+	for _, k := range config.HTTPServer.Session.KeyPairs {
 		keyBytes = append(keyBytes, []byte(k))
 	}
 
-	store, err := redis.NewStore(10, "tcp", redisConfig.Address, redisConfig.User, redisConfig.Password, keyBytes...)
+	store, err := redis.NewStore(10, "tcp", config.Redis.Address, config.Redis.User, config.Redis.Password, keyBytes...)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +27,7 @@ func ProvideRedisStore(redisConfig config.RedisConfig, httpServerConfig config.H
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   httpServerConfig.Session.Timeout,
+		MaxAge:   config.HTTPServer.Session.Timeout,
 	})
 
 	return store, nil

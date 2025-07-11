@@ -1,15 +1,22 @@
 package middlewares
 
 import (
-	"conformitea/server/internal/types"
+	"fmt"
+
+	"conformitea/server/internal/config"
+	"conformitea/server/internal/gateways/gin_session"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
-func SessionMiddleware(server types.InternalServer) gin.HandlerFunc {
-	redisStore := server.GetSessionStore()
-	cookieName := server.GetConfig().HTTPServer.Session.CookieName
+func SessionMiddleware() (gin.HandlerFunc, error) {
+	sessionStore, err := gin_session.NewStore()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize session store: %w", err)
+	}
 
-	return sessions.Sessions(cookieName, redisStore)
+	cookieName := config.GetConfig().HTTPServer.Session.CookieName
+
+	return sessions.Sessions(cookieName, sessionStore), nil
 }

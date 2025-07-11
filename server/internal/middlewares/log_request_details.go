@@ -1,14 +1,15 @@
 package middlewares
 
 import (
-	"conformitea/server/internal/types"
 	"time"
+
+	log "conformitea/server/internal/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-func LogRequestDetails(server types.InternalServer) gin.HandlerFunc {
+func LogRequestDetails() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Start timer
 		start := time.Now()
@@ -23,7 +24,7 @@ func LogRequestDetails(server types.InternalServer) gin.HandlerFunc {
 		if ctxLogger, exists := c.Get("logger"); exists {
 			logger = ctxLogger.(*zap.Logger)
 		} else {
-			logger = server.GetLogger()
+			logger = log.GetLogger()
 		}
 
 		// Calculate latency

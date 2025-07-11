@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"conformitea/server/config"
+	"conformitea/server/types"
 
 	"github.com/spf13/cobra"
 )
 
-func Execute(cfg config.Config) {
+func Execute(cfg types.Config) {
 	rootCmd := &cobra.Command{
 		Use:   "conformitea",
 		Short: "Compliance Management, Simplified.",

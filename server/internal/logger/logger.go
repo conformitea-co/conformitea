@@ -5,13 +5,17 @@ import (
 	"os"
 	"strings"
 
-	"conformitea/server/config"
+	"conformitea/server/internal/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-func ProvideLogger(config config.LoggerConfig) (*zap.Logger, error) {
+var roLogger *zap.Logger
+
+func Initialize() error {
+	config := config.GetConfig().Logger
+
 	// Set defaults for empty values
 	if config.Level == "" {
 		config.Level = "info"
@@ -25,7 +29,7 @@ func ProvideLogger(config config.LoggerConfig) (*zap.Logger, error) {
 
 	level, err := zapcore.ParseLevel(config.Level)
 	if err != nil {
-		return nil, fmt.Errorf("invalid log level %q: %w", config.Level, err)
+		return fmt.Errorf("invalid log level %q: %w", config.Level, err)
 	}
 
 	encoderConfig := zapcore.EncoderConfig{
@@ -63,7 +67,7 @@ func ProvideLogger(config config.LoggerConfig) (*zap.Logger, error) {
 		// Assume it's a file path
 		file, err := os.OpenFile(config.Output, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
-			return nil, fmt.Errorf("failed to open log file %q: %w", config.Output, err)
+			return fmt.Errorf("failed to open log file %q: %w", config.Output, err)
 		}
 		writer = zapcore.AddSync(file)
 	}
@@ -71,11 +75,19 @@ func ProvideLogger(config config.LoggerConfig) (*zap.Logger, error) {
 	core := zapcore.NewCore(encoder, writer, level)
 
 	// Build logger with options
-	logger := zap.New(core,
+	roLogger = zap.New(core,
 		zap.AddCaller(),
 		zap.AddCallerSkip(1), // Skip one level for wrapper functions
 		zap.AddStacktrace(zapcore.ErrorLevel),
 	)
 
-	return logger, nil
+	return nil
+}
+
+func GetLogger() *zap.Logger {
+	if roLogger == nil {
+		panic("logger not initialized, call Initialize first")
+	}
+
+	return roLogger
 }

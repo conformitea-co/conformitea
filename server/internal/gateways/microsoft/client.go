@@ -5,31 +5,27 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 
-	"conformitea/server/config"
+	"conformitea/server/internal/config"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/microsoft"
 )
 
-var (
-	client *OAuthClient
-	once   sync.Once
-)
+var client *OAuthClient
 
-func Initialize(cfg config.MicrosoftOAuthConfig) {
-	once.Do(func() {
-		client = &OAuthClient{
-			config: oauth2.Config{
-				ClientID:     cfg.ClientID,
-				ClientSecret: cfg.ClientSecret,
-				RedirectURL:  cfg.RedirectURL,
-				Scopes:       cfg.Scopes,
-				Endpoint:     microsoft.AzureADEndpoint("common"),
-			},
-		}
-	})
+func Initialize() {
+	config := config.GetConfig().OAuth.Microsoft
+
+	client = &OAuthClient{
+		config: oauth2.Config{
+			ClientID:     config.ClientID,
+			ClientSecret: config.ClientSecret,
+			RedirectURL:  config.RedirectURL,
+			Scopes:       config.Scopes,
+			Endpoint:     microsoft.AzureADEndpoint("common"),
+		},
+	}
 }
 
 // GetOAuthClient returns the initialized Microsoft OAuth2 client.

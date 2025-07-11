@@ -7,33 +7,20 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 	"time"
 
-	"conformitea/server/config"
+	"conformitea/server/internal/config"
 )
 
-var (
-	client  *HydraClient
-	once    sync.Once
-	initErr error
-)
+var client *HydraClient
 
-func Initialize(config config.HydraConfig) error {
-	once.Do(func() {
-		if config.AdminURL == "" {
-			initErr = fmt.Errorf("hydra admin URL is not configured")
-			return
-		}
-		client = &HydraClient{
-			adminURL: config.AdminURL,
-			httpClient: &http.Client{
-				Timeout: 30 * time.Second,
-			},
-		}
-	})
-
-	return initErr
+func Initialize() {
+	client = &HydraClient{
+		adminURL: config.GetConfig().Hydra.AdminURL,
+		httpClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+	}
 }
 
 func GetHydraClient() (*HydraClient, error) {

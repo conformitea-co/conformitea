@@ -7,7 +7,6 @@ require (
 	github.com/gin-contrib/sessions v1.0.4
 	github.com/gin-gonic/gin v1.10.1
 	github.com/google/uuid v1.6.0
-	github.com/google/wire v0.6.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/oauth2 v0.30.0
 )

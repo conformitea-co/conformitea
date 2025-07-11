@@ -1,14 +1,14 @@
 package middlewares
 
 import (
-	"conformitea/server/internal/types"
+	"conformitea/server/internal/logger"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ContextLoggerMiddleware(server types.InternalServer) gin.HandlerFunc {
+func ContextLoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("logger", server.GetLogger())
+		c.Set("logger", logger.GetLogger())
 
 		c.Next()
 	}

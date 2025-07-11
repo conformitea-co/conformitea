@@ -6,8 +6,9 @@ import (
 	"net/http"
 
 	cftError "conformitea/server/internal/error"
-	"conformitea/server/internal/gateway/hydra"
-	cftMicrosoft "conformitea/server/internal/gateway/microsoft"
+	"conformitea/server/internal/gateways/hydra"
+	"conformitea/server/internal/gateways/microsoft"
+	"conformitea/server/internal/handlers/utils"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,9 @@ func generateNonce() (string, error) {
 }
 
 // Handles the initial login request from Hydra and routes to appropriate IdP.
-func Login(c *gin.Context, logger *zap.Logger) {
+func Login(c *gin.Context) {
+	logger := utils.GetLogger(c)
+
 	// Extract login_challenge from Hydra
 	loginChallenge := c.Query("login_challenge")
 	if loginChallenge == "" {
@@ -123,7 +126,7 @@ func Login(c *gin.Context, logger *zap.Logger) {
 		return
 	}
 
-	microsoftClient, err := cftMicrosoft.GetOAuthClient()
+	microsoftClient, err := microsoft.GetOAuthClient()
 	if err != nil {
 		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), nil)
 
