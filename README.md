@@ -1,10 +1,20 @@
 # ConformiTea
 
-Sit back and relax.
+Compliance Management, Simplified.
 
 ## Development
 
-### Using Codespaces
+### Project Structure
+
+```
+conformitea/
+├── cmd/            # CLI module
+├── domain/         # Domain module
+├── server/         # HTTP server module
+├── frontend/       # React frontend (Node.js)
+```
+
+### Using Dev Containers
 
 - Create a copy of the Hydra configuration sample file:
 
