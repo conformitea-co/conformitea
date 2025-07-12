@@ -8,4 +8,5 @@ hydra.yml
 node_modules
 dist
 
+*.clinerules
 memory-bank
