@@ -19,6 +19,11 @@ key_pairs = [
 # invalidated.
 timeout = 3600
 
+[database]
+url = "postgres://postgres:postgres@postgres:5432/conformitea?sslmode=disable"
+max_open_connections = 25
+max_idle_connections = 5
+
 [redis]
 address = "localhost:6379"
 user = "redis"

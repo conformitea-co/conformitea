@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"conformitea/server/internal/config"
+	"conformitea/server/internal/database"
 	"conformitea/server/internal/gateways"
 	"conformitea/server/internal/logger"
 	"conformitea/server/internal/middlewares"
 	"conformitea/server/internal/routes"
-	"conformitea/server/types"
 	public "conformitea/server/types"
 
 	"github.com/gin-gonic/gin"
@@ -56,13 +56,17 @@ func (s *serverDependencies) Start() error {
 
 var cftServer *serverDependencies
 
-func Initialize(c types.Config) (public.Server, error) {
+func Initialize(c public.Config) (public.Server, error) {
 	if err := config.Initialize(c); err != nil {
 		return nil, fmt.Errorf("failed to initialize config: %w", err)
 	}
 
 	if err := logger.Initialize(); err != nil {
 		return nil, fmt.Errorf("failed to initialize logger: %w", err)
+	}
+
+	if err := database.Initialize(); err != nil {
+		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
 
 	gateways.Initialize()
