@@ -17,10 +17,10 @@ var db *sql.DB
 func Initialize() error {
 	cfg := config.GetConfig().Database
 
-	if _db, err := sql.Open("postgres", cfg.URL); err != nil {
+	var err error
+	db, err = sql.Open("postgres", cfg.URL)
+	if err != nil {
 		return err
-	} else {
-		db = _db
 	}
 
 	db.SetMaxOpenConns(cfg.MaxOpenConnections)
