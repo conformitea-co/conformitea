@@ -30,7 +30,7 @@ func RunMigrations() error {
 	}
 
 	// Run migrations
-	if err := m.Up(); !errors.Is(err, migrate.ErrNoChange) {
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return err
 	}
 
