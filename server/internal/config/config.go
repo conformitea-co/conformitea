@@ -6,6 +6,8 @@ import (
 	"conformitea/server/types"
 )
 
+var BUILD = "development"
+
 var roConfig types.Config
 
 func Initialize(c types.Config) error {
@@ -15,6 +17,10 @@ func Initialize(c types.Config) error {
 	}
 
 	if err := c.HTTPServer.Validate(); err != nil {
+		errs = append(errs, err)
+	}
+
+	if err := c.Database.Validate(); err != nil {
 		errs = append(errs, err)
 	}
 
