@@ -1,12 +1,9 @@
 package auth
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"net/http"
 
-	"conformitea/infrastructure/gateway/hydra"
-	"conformitea/infrastructure/gateway/microsoft"
+	appAuth "conformitea/app/auth"
 	cftError "conformitea/server/internal/error"
 	"conformitea/server/internal/handlers/utils"
 
@@ -14,18 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
-
-// Creates a secure random nonce for OAuth2 state.
-func generateNonce() (string, error) {
-	bytes := make([]byte, 16)
-	_, err := rand.Read(bytes)
-
-	if err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(bytes), nil
-}
 
 // Handles the initial login request from Hydra and routes to appropriate IdP.
 func Login(c *gin.Context) {
@@ -51,58 +36,22 @@ func Login(c *gin.Context) {
 		zap.String("login_challenge", loginChallenge),
 	)
 
-	hydraClient, err := hydra.GetHydraClient()
+	// Use application layer to handle login logic
+	req := appAuth.LoginRequest{
+		LoginChallenge: loginChallenge,
+	}
+
+	result, err := appAuth.InitiateLogin(req)
 	if err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionNotFound, err.Error(), map[string]interface{}{
+		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), map[string]interface{}{
 			"login_challenge": loginChallenge,
 		})
 
-		logger.Error("failed to get Hydra client",
+		logger.Error("failed to initiate login",
 			zap.String("login_challenge", loginChallenge),
 			zap.Error(err),
 			zap.String("error_code", string(authErr.Code)),
 		)
-
-		c.JSON(authErr.HTTPStatusCode(), authErr)
-		return
-	}
-
-	loginSession, err := hydraClient.GetLoginSession(loginChallenge)
-	if err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionNotFound, err.Error(), map[string]interface{}{
-			"login_challenge": loginChallenge,
-		})
-
-		logger.Error("failed to get Hydra login session",
-			zap.String("login_challenge", loginChallenge),
-			zap.Error(err),
-			zap.String("error_code", string(authErr.Code)),
-		)
-
-		c.JSON(authErr.HTTPStatusCode(), authErr)
-		return
-	}
-
-	// Determine IdP based on client_id
-	provider := loginSession.Client.ClientId
-	if provider != "microsoft" {
-		authErr := cftError.NewAuthError(cftError.AuthProviderNotSupported, map[string]interface{}{
-			"provider": provider,
-		})
-
-		logger.Warn("unsupported provider requested",
-			zap.String("provider", provider),
-			zap.String("error_code", string(authErr.Code)),
-		)
-
-		c.JSON(authErr.HTTPStatusCode(), authErr)
-		return
-	}
-
-	// Generate nonce for security
-	nonce, err := generateNonce()
-	if err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), nil)
 
 		c.JSON(authErr.HTTPStatusCode(), authErr)
 		return
@@ -110,9 +59,9 @@ func Login(c *gin.Context) {
 
 	// Store auth info in session for callback handler
 	session := sessions.Default(c)
-	session.Set("hydra_login_challenge", loginChallenge)
-	session.Set("idp_provider", provider)
-	session.Set("auth_nonce", nonce)
+	session.Set("hydra_login_challenge", result.HydraLoginChallenge)
+	session.Set("idp_provider", result.IDPProvider)
+	session.Set("auth_nonce", result.AuthNonce)
 
 	if err := session.Save(); err != nil {
 		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), nil)
@@ -126,37 +75,10 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	microsoftClient, err := microsoft.GetOAuthClient()
-	if err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), nil)
-
-		logger.Error("failed to get Microsoft OAuth client",
-			zap.Error(err),
-			zap.String("error_code", string(authErr.Code)),
-		)
-
-		c.JSON(authErr.HTTPStatusCode(), authErr)
-		return
-	}
-
-	authURL, err := microsoftClient.GenerateAuthURL(loginChallenge, nonce)
-	if err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), nil)
-
-		logger.Error("failed to generate Microsoft OAuth URL",
-			zap.Error(err),
-			zap.String("login_challenge", loginChallenge),
-			zap.String("error_code", string(authErr.Code)),
-		)
-
-		c.JSON(authErr.HTTPStatusCode(), authErr)
-		return
-	}
-
 	logger.Info("redirecting to OAuth2 provider",
-		zap.String("provider", provider),
+		zap.String("provider", result.IDPProvider),
 		zap.String("login_challenge", loginChallenge),
 	)
 
-	c.Redirect(http.StatusFound, authURL)
+	c.Redirect(http.StatusFound, result.AuthURL)
 }
