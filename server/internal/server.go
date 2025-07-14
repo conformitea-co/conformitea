@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
+	"conformitea/infrastructure/gateway"
 	"conformitea/server/internal/config"
 	"conformitea/server/internal/database"
-	"conformitea/server/internal/gateways"
 	"conformitea/server/internal/logger"
 	"conformitea/server/internal/middlewares"
 	"conformitea/server/internal/routes"
@@ -69,7 +69,14 @@ func Initialize(c public.Config) (public.Server, error) {
 		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
 
-	gateways.Initialize()
+	cfg := config.GetConfig()
+	gateway.Initialize(
+		cfg.Hydra.AdminURL,
+		cfg.OAuth.Microsoft.ClientID,
+		cfg.OAuth.Microsoft.ClientSecret,
+		cfg.OAuth.Microsoft.RedirectURL,
+		cfg.OAuth.Microsoft.Scopes,
+	)
 
 	cftServer = &serverDependencies{
 		router: gin.New(),

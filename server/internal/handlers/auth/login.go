@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 	"net/http"
 
+	"conformitea/infrastructure/gateway/hydra"
+	"conformitea/infrastructure/gateway/microsoft"
 	cftError "conformitea/server/internal/error"
-	"conformitea/server/internal/gateways/hydra"
-	"conformitea/server/internal/gateways/microsoft"
 	"conformitea/server/internal/handlers/utils"
 
 	"github.com/gin-contrib/sessions"

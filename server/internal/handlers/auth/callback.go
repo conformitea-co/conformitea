@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"conformitea/infrastructure/gateway/hydra"
+	"conformitea/infrastructure/gateway/microsoft"
 	"conformitea/server/internal/config"
 	cftError "conformitea/server/internal/error"
-	"conformitea/server/internal/gateways/hydra"
-	"conformitea/server/internal/gateways/microsoft"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -153,12 +153,6 @@ func handleMicrosoftCallback(c *gin.Context, authContext map[string]string) {
 	if err := session.Save(); err != nil {
 		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), nil)
 
-		c.JSON(authErr.HTTPStatusCode(), authErr)
-		return
-	}
-
-	if err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthHydraClientInit, err.Error(), nil)
 		c.JSON(authErr.HTTPStatusCode(), authErr)
 		return
 	}

@@ -38,7 +38,7 @@ func Me(c *gin.Context) {
 
 	// Validate required fields
 	if userID == "" || email == "" {
-		authErr := cerror.NewAuthError(cerror.AuthSessionExpired, map[string]interface{}{
+		authErr := cerror.NewAuthError(cerror.AuthSessionExpired, map[string]any{
 			"reason": "missing_user_data",
 		})
 		c.JSON(authErr.HTTPStatusCode(), authErr)
