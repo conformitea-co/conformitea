@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"conformitea/server/internal/config"
-	"conformitea/server/internal/gateways/gin_session"
+	"conformitea/server/internal/gateway/gin_session"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"

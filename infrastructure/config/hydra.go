@@ -1,8 +1,7 @@
-package sections
+package config
 
 import (
 	"errors"
-	"strings"
 )
 
 type HydraConfig struct {
@@ -11,17 +10,17 @@ type HydraConfig struct {
 }
 
 func (h *HydraConfig) Validate() error {
-	var errs []string
+	var errs []error
 	if h.AdminURL == "" {
-		errs = append(errs, "hydra.admin_url is required")
+		errs = append(errs, errors.New("hydra.admin_url is required"))
 	}
 
 	if h.PublicURL == "" {
-		errs = append(errs, "hydra.public_url is required")
+		errs = append(errs, errors.New("hydra.public_url is required"))
 	}
 
 	if len(errs) > 0 {
-		return errors.New(strings.Join(errs, "; "))
+		return errors.Join(errs...)
 	}
 
 	return nil

@@ -5,31 +5,15 @@ import (
 	"os"
 	"strings"
 
-	"conformitea/server/internal/config"
+	"conformitea/infrastructure/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var roLogger *zap.Logger
-
-func Initialize() error {
-	loggerConfigValues := config.GetConfig().Logger
-
-	// Set defaults for empty values
-	if loggerConfigValues.Level == "" {
-		loggerConfigValues.Level = "info"
-	}
-	if loggerConfigValues.Format == "" {
-		loggerConfigValues.Format = "json"
-	}
-	if loggerConfigValues.Output == "" {
-		loggerConfigValues.Output = "stdout"
-	}
-
-	level, err := zapcore.ParseLevel(loggerConfigValues.Level)
-	if err != nil {
-		return fmt.Errorf("invalid log level %q: %w", loggerConfigValues.Level, err)
+func Initialize(loggerConfigValues config.LoggerConfig) (*zap.Logger, error) {
+	if err := loggerConfigValues.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid logger configuration: %w", err)
 	}
 
 	encoderConfig := zapcore.EncoderConfig{
@@ -67,29 +51,20 @@ func Initialize() error {
 		// Assume it's a file path
 		file, err := os.OpenFile(loggerConfigValues.Output, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
-			return fmt.Errorf("failed to open log file %q: %w", loggerConfigValues.Output, err)
+			return nil, fmt.Errorf("failed to open log file %q: %w", loggerConfigValues.Output, err)
 		}
 		writer = zapcore.AddSync(file)
 	}
 
+	level, _ := zapcore.ParseLevel(loggerConfigValues.Level)
 	core := zapcore.NewCore(encoder, writer, level)
 
 	if config.BUILD == "development" {
-		roLogger = zap.New(core,
+		return zap.New(core,
 			zap.AddCaller(),
 			zap.AddStacktrace(zapcore.ErrorLevel),
-		)
+		), nil
 	} else {
-		roLogger = zap.New(core)
+		return zap.New(core), nil
 	}
-
-	return nil
-}
-
-func GetLogger() *zap.Logger {
-	if roLogger == nil {
-		panic("logger not initialized, call Initialize first")
-	}
-
-	return roLogger
 }

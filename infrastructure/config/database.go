@@ -1,23 +1,20 @@
-package sections
+package config
 
 import (
 	"errors"
-	"fmt"
 )
 
-// DatabaseConfig represents the database configuration section
 type DatabaseConfig struct {
-	URL                string `mapstructure:"url"`
+	DSN                string `mapstructure:"dsn"`
 	MaxOpenConnections int    `mapstructure:"max_open_connections"`
 	MaxIdleConnections int    `mapstructure:"max_idle_connections"`
 }
 
-// Validate validates the database configuration
 func (d DatabaseConfig) Validate() error {
 	var errs []error
 
-	if d.URL == "" {
-		errs = append(errs, errors.New("database URL is required"))
+	if d.DSN == "" {
+		errs = append(errs, errors.New("database DSN is required"))
 	}
 
 	if d.MaxOpenConnections <= 0 {
@@ -33,7 +30,7 @@ func (d DatabaseConfig) Validate() error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("database configuration validation failed: %w", errors.Join(errs...))
+		return errors.Join(errs...)
 	}
 
 	return nil

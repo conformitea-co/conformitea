@@ -1,8 +1,10 @@
 package database
 
 import (
-	"conformitea/server/migrations"
+	"database/sql"
 	"errors"
+
+	"conformitea/infrastructure/database/migrations"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -10,7 +12,7 @@ import (
 )
 
 // Runs all pending migrations automatically
-func RunMigrations() error {
+func RunMigrations(sqlDB *sql.DB) error {
 	// Create migration source from embedded files
 	source, err := iofs.New(migrations.MigrationFiles, ".")
 	if err != nil {

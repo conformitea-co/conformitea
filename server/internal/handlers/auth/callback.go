@@ -59,7 +59,6 @@ func Callback(c *gin.Context) {
 		return
 	}
 
-	// Use application layer to process callback
 	req := appAuth.CallbackRequest{
 		Code:                code,
 		State:               state,

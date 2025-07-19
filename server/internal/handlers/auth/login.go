@@ -5,7 +5,7 @@ import (
 
 	appAuth "conformitea/app/auth"
 	cftError "conformitea/server/internal/error"
-	"conformitea/server/internal/handlers/utils"
+	"conformitea/server/internal/handlers/util"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ import (
 
 // Handles the initial login request from Hydra and routes to appropriate IdP.
 func Login(c *gin.Context) {
-	logger := utils.GetLogger(c)
+	logger := util.GetLogger(c)
 
 	// Extract login_challenge from Hydra
 	loginChallenge := c.Query("login_challenge")
@@ -36,7 +36,6 @@ func Login(c *gin.Context) {
 		zap.String("login_challenge", loginChallenge),
 	)
 
-	// Use application layer to handle login logic
 	req := appAuth.LoginRequest{
 		LoginChallenge: loginChallenge,
 	}
