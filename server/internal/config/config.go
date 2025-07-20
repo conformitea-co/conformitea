@@ -20,23 +20,7 @@ func Initialize(c types.Config) error {
 		errs = append(errs, err)
 	}
 
-	if err := c.Database.Validate(); err != nil {
-		errs = append(errs, err)
-	}
-
 	if err := c.Redis.Validate(); err != nil {
-		errs = append(errs, err)
-	}
-
-	if err := c.Hydra.Validate(); err != nil {
-		errs = append(errs, err)
-	}
-
-	if err := c.OAuth.Validate(); err != nil {
-		errs = append(errs, err)
-	}
-
-	if err := c.Logger.Validate(); err != nil {
 		errs = append(errs, err)
 	}
 

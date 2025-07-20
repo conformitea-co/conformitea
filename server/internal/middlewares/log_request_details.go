@@ -3,8 +3,6 @@ package middlewares
 import (
 	"time"
 
-	log "conformitea/server/internal/logger"
-
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -20,25 +18,12 @@ func LogRequestDetails() gin.HandlerFunc {
 		// Process request
 		c.Next()
 
-		var logger *zap.Logger
-		if ctxLogger, exists := c.Get("logger"); exists {
-			logger = ctxLogger.(*zap.Logger)
-		} else {
-			logger = log.GetLogger()
-		}
-
 		// Calculate latency
 		latency := time.Since(start)
 		latencyMS := latency.Milliseconds()
 
 		status := c.Writer.Status()
 		clientIP := c.ClientIP()
-
-		// Get error if any
-		var errorMessage string
-		if len(c.Errors) > 0 {
-			errorMessage = c.Errors.String()
-		}
 
 		requestDetailFields := []zap.Field{
 			zap.String("method", c.Request.Method),
@@ -50,11 +35,15 @@ func LogRequestDetails() gin.HandlerFunc {
 			zap.String("user_agent", c.Request.UserAgent()),
 		}
 
-		msg := "HTTP request"
-
-		if errorMessage != "" {
+		// Get error if any
+		var errorMessage string
+		if len(c.Errors) > 0 {
+			errorMessage = c.Errors.String()
 			requestDetailFields = append(requestDetailFields, zap.String("error", errorMessage))
 		}
+
+		msg := "http request details"
+		logger := c.MustGet("logger").(*zap.Logger)
 
 		switch {
 		case status >= 500:

@@ -3,14 +3,14 @@ package auth
 import (
 	"net/http"
 
-	cftError "conformitea/server/internal/error"
+	"conformitea/server/internal/cerror"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
 // Logout clears the user's session and logs them out.
-func Logout(c *gin.Context) {
+func (a *AuthHandlers) Logout(c *gin.Context) {
 	session := sessions.Default(c)
 
 	// Check if user is authenticated
@@ -27,7 +27,7 @@ func Logout(c *gin.Context) {
 	// Clear all session data
 	session.Clear()
 	if err := session.Save(); err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), map[string]interface{}{
+		authErr := cerror.NewAuthErrorWithMessage(cerror.AuthSessionCreateFailed, err.Error(), map[string]interface{}{
 			"operation": "logout",
 		})
 		c.JSON(authErr.HTTPStatusCode(), authErr)

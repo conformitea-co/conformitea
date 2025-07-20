@@ -1,5 +1,5 @@
 // Package error provides ConformiTea-specific error types and codes.
-package error
+package cerror
 
 import (
 	"encoding/json"

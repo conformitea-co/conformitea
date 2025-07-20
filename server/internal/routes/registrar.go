@@ -3,12 +3,11 @@ package routes
 import (
 	"conformitea/server/internal/handlers"
 	"conformitea/server/internal/handlers/auth"
-	"conformitea/server/internal/types"
+
+	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(s types.Server) {
-	router := s.GetRouter()
-
+func RegisterRoutes(router *gin.Engine, auth *auth.AuthHandlers) {
 	// Authentication routes
 	router.GET("/auth/callback", auth.Callback)
 	router.GET("/auth/login", auth.Login)

@@ -4,7 +4,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func FindByEmail(db *gorm.DB, email string) (*User, error) {
+type UserRepository struct{}
+
+func (r *UserRepository) GetUserByEmail(db *gorm.DB, email string) (*User, error) {
 	var user User
 
 	if err := db.Where("email = ?", email).First(&user).Error; err != nil {

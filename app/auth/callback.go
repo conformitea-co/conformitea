@@ -3,12 +3,8 @@ package auth
 import (
 	"context"
 	"fmt"
-
-	"conformitea/infrastructure/gateway/hydra"
-	"conformitea/infrastructure/gateway/microsoft"
 )
 
-// CallbackRequest represents the OAuth callback parameters
 type CallbackRequest struct {
 	Code                string
 	State               string
@@ -17,7 +13,6 @@ type CallbackRequest struct {
 	Provider            string
 }
 
-// CallbackResult represents the result of processing OAuth callback
 type CallbackResult struct {
 	AccessToken  string
 	RefreshToken string
@@ -27,42 +22,32 @@ type CallbackResult struct {
 	Provider     string
 }
 
-// ProcessCallback handles the business logic for OAuth2 callback processing
-func ProcessCallback(ctx context.Context, req CallbackRequest) (CallbackResult, error) {
+// Process OAuth2 callback
+func (a *Auth) ProcessCallback(ctx context.Context, req CallbackRequest) (CallbackResult, error) {
 	// Route to appropriate IdP handler
 	switch req.Provider {
 	case "microsoft":
-		return processMicrosoftCallback(ctx, req)
+		return a.processMicrosoftCallback(ctx, req)
 	default:
 		return CallbackResult{}, fmt.Errorf("unsupported provider: %s", req.Provider)
 	}
 }
 
 // Processes Microsoft OAuth2 callback and completes Hydra flow
-func processMicrosoftCallback(ctx context.Context, req CallbackRequest) (CallbackResult, error) {
-	microsoftClient, err := microsoft.GetOAuthClient()
-	if err != nil {
-		return CallbackResult{}, fmt.Errorf("failed to get Microsoft OAuth client: %w", err)
-	}
-
+func (a *Auth) processMicrosoftCallback(ctx context.Context, req CallbackRequest) (CallbackResult, error) {
 	// Exchange authorization code for access token
-	token, err := microsoftClient.ExchangeCodeForToken(ctx, req.Code)
+	token, err := a.msClient.ExchangeCodeForToken(ctx, req.Code)
 	if err != nil {
 		return CallbackResult{}, fmt.Errorf("failed to exchange code for token: %w", err)
 	}
 
 	// Get user profile from Microsoft Graph
-	userProfile, err := microsoftClient.GetUserProfile(ctx, token)
+	userProfile, err := a.msClient.GetUserProfile(ctx, token)
 	if err != nil {
 		return CallbackResult{}, fmt.Errorf("failed to get user profile: %w", err)
 	}
 
-	hydraClient, err := hydra.GetHydraClient()
-	if err != nil {
-		return CallbackResult{}, fmt.Errorf("failed to get Hydra client: %w", err)
-	}
-
-	hydraTokens, err := hydraClient.AcceptLoginSession(req.HydraLoginChallenge, userProfile.ID)
+	hydraTokens, err := a.hydraClient.AcceptLoginSession(req.HydraLoginChallenge, userProfile.ID)
 	if err != nil {
 		return CallbackResult{}, fmt.Errorf("failed to accept Hydra login session: %w", err)
 	}
