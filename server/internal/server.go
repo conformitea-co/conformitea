@@ -44,12 +44,11 @@ func (s *server) Start() error {
 		port = ":" + port
 	}
 
-	if err := s.router.Run(port); err == nil {
-		s.logger.Info(fmt.Sprintf("Server listening on port %s", port))
-		return nil
-	} else {
+	if err := s.router.Run(port); err != nil {
 		return err
 	}
+	s.logger.Info(fmt.Sprintf("Server listening on port %s", port))
+	return nil
 }
 
 func Initialize(c config.Config, l *zap.Logger, appAuth types.AppAuth) (types.Server, error) {
