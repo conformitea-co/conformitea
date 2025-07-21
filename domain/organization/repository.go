@@ -1,7 +1,10 @@
 package organization
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type OrganizationRepository interface {
-	GetOrganizationByID(id uuid.UUID) (*Organization, error)
+	GetOrganizationByID(DB *gorm.DB, id uuid.UUID) (Organization, error)
 }

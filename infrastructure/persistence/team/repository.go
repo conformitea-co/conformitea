@@ -1,16 +1,23 @@
 package team
 
 import (
+	domain "conformitea/domain/team"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func FindByID(db *gorm.DB, id uuid.UUID) (*Team, error) {
+type TeamRepository struct{}
+
+func (t *TeamRepository) GetTeamByID(DB *gorm.DB, id uuid.UUID) (domain.Team, error) {
 	var team Team
 
-	if err := db.Where("id = ?", id).First(&team).Error; err != nil {
-		return nil, err
+	if err := DB.Where("id = ?", id).First(&team).Error; err != nil {
+		return domain.Team{}, err
 	}
 
-	return &team, nil
+	return domain.Team{
+		ID:   team.ID,
+		Name: team.Name,
+	}, nil
 }

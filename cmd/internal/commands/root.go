@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"os"
 
-	"conformitea/server/types"
+	"conformitea/cmd/config"
 
 	"github.com/spf13/cobra"
 )
 
-func Execute(cfg types.Config) {
+func Execute(config config.Config) {
 	rootCmd := &cobra.Command{
 		Use:   "conformitea",
 		Short: "Compliance Management, Simplified.",
 	}
 
 	rootCmd.SilenceErrors = true
-	rootCmd.AddCommand(ServeCmd(cfg))
+	rootCmd.AddCommand(ServeCmd(config))
 
 	rootCmd.ErrOrStderr()
 

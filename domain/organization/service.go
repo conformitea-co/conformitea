@@ -1,6 +1,9 @@
 package organization
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type OrganizationService struct {
 	repository OrganizationRepository
@@ -12,6 +15,6 @@ func Initialize(r OrganizationRepository) *OrganizationService {
 	}
 }
 
-func (s *OrganizationService) GetOrganizationByID(id uuid.UUID) (*Organization, error) {
-	return s.repository.GetOrganizationByID(id)
+func (s *OrganizationService) GetOrganizationByID(DB *gorm.DB, id uuid.UUID) (Organization, error) {
+	return s.repository.GetOrganizationByID(DB, id)
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
+	"conformitea/cmd/config"
 	"conformitea/cmd/internal/commands"
-	"conformitea/server/types"
 
 	"github.com/spf13/viper"
 )
@@ -23,10 +23,10 @@ func main() {
 		}
 	}
 
-	var cfg types.Config
-	if err := viper.Unmarshal(&cfg); err != nil {
+	var config config.Config
+	if err := viper.Unmarshal(&config); err != nil {
 		panic(fmt.Errorf("failed to unmarshal config: %s", err))
 	}
 
-	commands.Execute(cfg)
+	commands.Execute(config)
 }

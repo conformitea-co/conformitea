@@ -2,16 +2,17 @@ package config
 
 import (
 	"errors"
-
-	"conformitea/server/types"
 )
 
-var BUILD = "development"
+type Config struct {
+	General    GeneralConfig    `mapstructure:"general"`
+	HTTPServer HTTPServerConfig `mapstructure:"server"`
+	Redis      RedisConfig      `mapstructure:"redis"`
+}
 
-var roConfig types.Config
-
-func Initialize(c types.Config) error {
+func (c *Config) Validate() error {
 	var errs []error
+
 	if err := c.General.Validate(); err != nil {
 		errs = append(errs, err)
 	}
@@ -28,11 +29,5 @@ func Initialize(c types.Config) error {
 		return errors.Join(errs...)
 	}
 
-	roConfig = c
-
 	return nil
-}
-
-func GetConfig() types.Config {
-	return roConfig
 }

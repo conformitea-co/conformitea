@@ -5,7 +5,7 @@ import (
 )
 
 type DatabaseConfig struct {
-	DSN                string `mapstructure:"dsn"`
+	URL                string `mapstructure:"url"`
 	MaxOpenConnections int    `mapstructure:"max_open_connections"`
 	MaxIdleConnections int    `mapstructure:"max_idle_connections"`
 }
@@ -13,8 +13,8 @@ type DatabaseConfig struct {
 func (d DatabaseConfig) Validate() error {
 	var errs []error
 
-	if d.DSN == "" {
-		errs = append(errs, errors.New("database DSN is required"))
+	if d.URL == "" {
+		errs = append(errs, errors.New("database URL is required"))
 	}
 
 	if d.MaxOpenConnections <= 0 {

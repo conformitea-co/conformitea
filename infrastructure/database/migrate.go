@@ -7,7 +7,7 @@ import (
 	"conformitea/infrastructure/database/migrations"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
@@ -20,7 +20,7 @@ func RunMigrations(sqlDB *sql.DB) error {
 	}
 
 	// Create database driver
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := pgx.WithInstance(sqlDB, &pgx.Config{})
 	if err != nil {
 		return err
 	}

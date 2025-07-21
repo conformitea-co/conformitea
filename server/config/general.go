@@ -1,8 +1,8 @@
-package sections
+package config
 
 import (
 	"errors"
-	"strings"
+	"fmt"
 )
 
 type GeneralConfig struct {
@@ -10,13 +10,13 @@ type GeneralConfig struct {
 }
 
 func (g *GeneralConfig) Validate() error {
-	var errs []string
+	var errs []error
 	if g.FrontendURL == "" {
-		errs = append(errs, "general.frontend_url is required")
+		errs = append(errs, fmt.Errorf("general.frontend_url is required"))
 	}
 
 	if len(errs) > 0 {
-		return errors.New(strings.Join(errs, "; "))
+		return errors.Join(errs...)
 	}
 
 	return nil

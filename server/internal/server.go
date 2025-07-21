@@ -5,12 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"conformitea/server/internal/config"
+	"conformitea/server/config"
 	"conformitea/server/internal/handlers/auth"
 	"conformitea/server/internal/middlewares"
 	"conformitea/server/internal/routes"
 	"conformitea/server/types"
-	public "conformitea/server/types"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -20,10 +19,7 @@ type server struct {
 	authHandlers *auth.AuthHandlers
 	logger       *zap.Logger
 	router       *gin.Engine
-}
-
-func (s *server) GetRouter() *gin.Engine {
-	return s.router
+	config       config.Config
 }
 
 func (s *server) Start() error {
@@ -38,7 +34,7 @@ func (s *server) Start() error {
 		}
 	}()
 
-	port := config.GetConfig().HTTPServer.Port
+	port := s.config.HTTPServer.Port
 	if port == "" {
 		port = "8080"
 	}
@@ -56,23 +52,24 @@ func (s *server) Start() error {
 	}
 }
 
-func Initialize(c public.Config, l *zap.Logger, appAuth types.AppAuth) (public.Server, error) {
-	if err := config.Initialize(c); err != nil {
-		return nil, fmt.Errorf("failed to initialize config: %w", err)
+func Initialize(c config.Config, l *zap.Logger, appAuth types.AppAuth) (types.Server, error) {
+	if err := c.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid server configuration: %w", err)
 	}
 
 	router := gin.New()
 
-	if err := middlewares.RegisterMiddlewares(router, l); err != nil {
+	if err := middlewares.RegisterMiddlewares(router, l, c); err != nil {
 		return nil, fmt.Errorf("failed to register middlewares: %w", err)
 	}
 
-	authHandlers := auth.Initialize(appAuth)
+	authHandlers := auth.Initialize(appAuth, c)
 	routes.RegisterRoutes(router, authHandlers)
 
 	return &server{
 		authHandlers: authHandlers,
 		logger:       l,
 		router:       router,
+		config:       c,
 	}, nil
 }

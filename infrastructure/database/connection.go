@@ -1,7 +1,6 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -12,14 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *sql.DB
-
 func Initialize(dbConfigValues config.DatabaseConfig, logger *zap.Logger) (*gorm.DB, error) {
 	if err := dbConfigValues.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid database configuration: %w", err)
 	}
 
-	db, err := gorm.Open(postgres.Open(dbConfigValues.DSN), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dbConfigValues.URL), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}

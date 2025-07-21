@@ -12,7 +12,7 @@ type Auth struct {
 	hydraClient *hydra.HydraClient
 }
 
-func NewAuth(us *user.UserService, mc *microsoft.OAuthClient, hc *hydra.HydraClient) *Auth {
+func Initialize(us *user.UserService, mc *microsoft.OAuthClient, hc *hydra.HydraClient) *Auth {
 	return &Auth{
 		userService: us,
 		msClient:    mc,

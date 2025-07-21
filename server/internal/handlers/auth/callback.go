@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"conformitea/server/internal/cerror"
-	"conformitea/server/internal/config"
 	"conformitea/server/types"
 
 	"github.com/gin-contrib/sessions"
@@ -113,5 +112,5 @@ func (a *AuthHandlers) Callback(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusFound, config.GetConfig().General.FrontendURL)
+	c.Redirect(http.StatusFound, a.config.General.FrontendURL)
 }

@@ -1,6 +1,9 @@
 package team
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type TeamService struct {
 	repository TeamRepository
@@ -12,6 +15,6 @@ func Initialize(r TeamRepository) *TeamService {
 	}
 }
 
-func (s *TeamService) GetTeamByID(id uuid.UUID) (*Team, error) {
-	return s.repository.GetTeamByID(id)
+func (s *TeamService) GetTeamByID(DB *gorm.DB, id uuid.UUID) (Team, error) {
+	return s.repository.GetTeamByID(DB, id)
 }
