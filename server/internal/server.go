@@ -47,7 +47,7 @@ func (s *server) Start() error {
 	if err := s.router.Run(port); err != nil {
 		return err
 	}
-	s.logger.Info(fmt.Sprintf("Server listening on port %s", port))
+
 	return nil
 }
 
