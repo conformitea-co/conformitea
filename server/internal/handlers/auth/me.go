@@ -3,7 +3,7 @@ package auth
 import (
 	"net/http"
 
-	cerror "conformitea/server/internal/error"
+	"conformitea/server/internal/cerror"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ type UserResponse struct {
 }
 
 // Me returns the current user's session information.
-func Me(c *gin.Context) {
+func (a *AuthHandlers) Me(c *gin.Context) {
 	session := sessions.Default(c)
 
 	// Check if user is authenticated

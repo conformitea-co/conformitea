@@ -4,21 +4,26 @@ import (
 	"context"
 	"net/http"
 
-	appAuth "conformitea/app/auth"
-	"conformitea/server/internal/config"
-	cftError "conformitea/server/internal/error"
+	"conformitea/server/internal/cerror"
+	"conformitea/server/types"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // Handles OAuth2 callbacks from identity providers and completes the Hydra flow.
-func Callback(c *gin.Context) {
+func (a *AuthHandlers) Callback(c *gin.Context) {
+	logger := c.MustGet("logger").(*zap.Logger)
+	logger.Info("processing oauth2 callback")
+
 	code := c.Query("code")
 	state := c.Query("state")
 
 	if code == "" {
-		authErr := cftError.NewAuthError(cftError.AuthInvalidState, map[string]any{
+		logger.Warn("oauth2 callback without code")
+
+		authErr := cerror.NewAuthError(cerror.AuthInvalidState, map[string]any{
 			"parameter": "code",
 			"reason":    "missing",
 		})
@@ -31,7 +36,9 @@ func Callback(c *gin.Context) {
 
 	hydraLoginChallenge, exists := session.Get("hydra_login_challenge").(string)
 	if !exists || hydraLoginChallenge == "" {
-		authErr := cftError.NewAuthError(cftError.AuthSessionNotFound, map[string]any{
+		logger.Warn("oauth2 callback without hydra login challenge")
+
+		authErr := cerror.NewAuthError(cerror.AuthSessionNotFound, map[string]any{
 			"session_key": "hydra_login_challenge",
 		})
 
@@ -41,7 +48,9 @@ func Callback(c *gin.Context) {
 
 	provider, exists := session.Get("idp_provider").(string)
 	if !exists || provider == "" {
-		authErr := cftError.NewAuthError(cftError.AuthSessionNotFound, map[string]any{
+		logger.Warn("oauth2 callback without identity provider")
+
+		authErr := cerror.NewAuthError(cerror.AuthSessionNotFound, map[string]any{
 			"session_key": "idp_provider",
 		})
 
@@ -51,7 +60,9 @@ func Callback(c *gin.Context) {
 
 	nonce, exists := session.Get("auth_nonce").(string)
 	if !exists || nonce == "" {
-		authErr := cftError.NewAuthError(cftError.AuthSessionNotFound, map[string]any{
+		logger.Warn("oauth2 callback without auth nonce")
+
+		authErr := cerror.NewAuthError(cerror.AuthSessionNotFound, map[string]any{
 			"session_key": "auth_nonce",
 		})
 
@@ -59,8 +70,7 @@ func Callback(c *gin.Context) {
 		return
 	}
 
-	// Use application layer to process callback
-	req := appAuth.CallbackRequest{
+	req := types.CallbackRequest{
 		Code:                code,
 		State:               state,
 		Nonce:               nonce,
@@ -69,9 +79,11 @@ func Callback(c *gin.Context) {
 	}
 
 	ctx := context.Background()
-	result, err := appAuth.ProcessCallback(ctx, req)
+	result, err := a.appAuth.ProcessCallback(ctx, req)
 	if err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthMicrosoftExchange, err.Error(), map[string]any{
+		logger.Error("failed to process oauth2 callback", zap.Error(err))
+
+		authErr := cerror.NewAuthErrorWithMessage(cerror.AuthMicrosoftExchange, err.Error(), map[string]any{
 			"provider": provider,
 		})
 
@@ -94,11 +106,11 @@ func Callback(c *gin.Context) {
 	session.Delete("auth_nonce")
 
 	if err := session.Save(); err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), nil)
+		authErr := cerror.NewAuthErrorWithMessage(cerror.AuthSessionCreateFailed, err.Error(), nil)
 
 		c.JSON(authErr.HTTPStatusCode(), authErr)
 		return
 	}
 
-	c.Redirect(http.StatusFound, config.GetConfig().General.FrontendURL)
+	c.Redirect(http.StatusFound, a.config.General.FrontendURL)
 }

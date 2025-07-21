@@ -5,29 +5,27 @@ import (
 	"os"
 	"strings"
 
-	"conformitea/infrastructure/gateway"
-	"conformitea/server/internal/config"
-	"conformitea/server/internal/database"
-	"conformitea/server/internal/logger"
+	"conformitea/server/config"
+	"conformitea/server/internal/handlers/auth"
 	"conformitea/server/internal/middlewares"
 	"conformitea/server/internal/routes"
-	public "conformitea/server/types"
+	"conformitea/server/types"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-type serverDependencies struct {
-	router *gin.Engine
+type server struct {
+	authHandlers *auth.AuthHandlers
+	logger       *zap.Logger
+	router       *gin.Engine
+	config       config.Config
 }
 
-func (s *serverDependencies) GetRouter() *gin.Engine {
-	return s.router
-}
-
-func (s *serverDependencies) Start() error {
+func (s *server) Start() error {
 	// Ensure logs are flushed on shutdown
 	defer func() {
-		if err := logger.GetLogger().Sync(); err != nil {
+		if err := s.logger.Sync(); err != nil {
 			// Ignore sync errors on stdout/stderr
 			if err.Error() != "sync /dev/stdout: inappropriate ioctl for device" &&
 				err.Error() != "sync /dev/stderr: inappropriate ioctl for device" {
@@ -36,7 +34,7 @@ func (s *serverDependencies) Start() error {
 		}
 	}()
 
-	port := config.GetConfig().HTTPServer.Port
+	port := s.config.HTTPServer.Port
 	if port == "" {
 		port = "8080"
 	}
@@ -46,47 +44,31 @@ func (s *serverDependencies) Start() error {
 		port = ":" + port
 	}
 
-	var err error
-	if err = s.router.Run(port); err == nil {
-		logger.GetLogger().Info(fmt.Sprintf("Server listening on port %s", port))
+	if err := s.router.Run(port); err != nil {
+		return err
 	}
 
-	return err
+	return nil
 }
 
-var cftServer *serverDependencies
-
-func Initialize(c public.Config) (public.Server, error) {
-	if err := config.Initialize(c); err != nil {
-		return nil, fmt.Errorf("failed to initialize config: %w", err)
+func Initialize(c config.Config, l *zap.Logger, appAuth types.AppAuth) (types.Server, error) {
+	if err := c.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid server configuration: %w", err)
 	}
 
-	if err := logger.Initialize(); err != nil {
-		return nil, fmt.Errorf("failed to initialize logger: %w", err)
-	}
+	router := gin.New()
 
-	if err := database.Initialize(); err != nil {
-		return nil, fmt.Errorf("failed to initialize database: %w", err)
-	}
-
-	cfg := config.GetConfig()
-	gateway.Initialize(
-		cfg.Hydra.AdminURL,
-		cfg.OAuth.Microsoft.ClientID,
-		cfg.OAuth.Microsoft.ClientSecret,
-		cfg.OAuth.Microsoft.RedirectURL,
-		cfg.OAuth.Microsoft.Scopes,
-	)
-
-	cftServer = &serverDependencies{
-		router: gin.New(),
-	}
-
-	if err := middlewares.RegisterMiddlewares(cftServer); err != nil {
+	if err := middlewares.RegisterMiddlewares(router, l, c); err != nil {
 		return nil, fmt.Errorf("failed to register middlewares: %w", err)
 	}
 
-	routes.RegisterRoutes(cftServer)
+	authHandlers := auth.Initialize(appAuth, c)
+	routes.RegisterRoutes(router, authHandlers)
 
-	return cftServer, nil
+	return &server{
+		authHandlers: authHandlers,
+		logger:       l,
+		router:       router,
+		config:       c,
+	}, nil
 }

@@ -3,9 +3,8 @@ package auth
 import (
 	"net/http"
 
-	appAuth "conformitea/app/auth"
-	cftError "conformitea/server/internal/error"
-	"conformitea/server/internal/handlers/utils"
+	"conformitea/server/internal/cerror"
+	"conformitea/server/types"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -13,13 +12,13 @@ import (
 )
 
 // Handles the initial login request from Hydra and routes to appropriate IdP.
-func Login(c *gin.Context) {
-	logger := utils.GetLogger(c)
+func (a *AuthHandlers) Login(c *gin.Context) {
+	logger := c.MustGet("logger").(*zap.Logger)
 
 	// Extract login_challenge from Hydra
 	loginChallenge := c.Query("login_challenge")
 	if loginChallenge == "" {
-		authErr := cftError.NewAuthError(cftError.AuthInvalidState, map[string]any{
+		authErr := cerror.NewAuthError(cerror.AuthInvalidState, map[string]any{
 			"parameter": "login_challenge",
 			"reason":    "missing",
 		})
@@ -36,14 +35,9 @@ func Login(c *gin.Context) {
 		zap.String("login_challenge", loginChallenge),
 	)
 
-	// Use application layer to handle login logic
-	req := appAuth.LoginRequest{
-		LoginChallenge: loginChallenge,
-	}
-
-	result, err := appAuth.InitiateLogin(req)
+	result, err := a.appAuth.InitiateLogin(types.LoginRequest{LoginChallenge: loginChallenge})
 	if err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), map[string]interface{}{
+		authErr := cerror.NewAuthErrorWithMessage(cerror.AuthSessionCreateFailed, err.Error(), map[string]interface{}{
 			"login_challenge": loginChallenge,
 		})
 
@@ -64,7 +58,7 @@ func Login(c *gin.Context) {
 	session.Set("auth_nonce", result.AuthNonce)
 
 	if err := session.Save(); err != nil {
-		authErr := cftError.NewAuthErrorWithMessage(cftError.AuthSessionCreateFailed, err.Error(), nil)
+		authErr := cerror.NewAuthErrorWithMessage(cerror.AuthSessionCreateFailed, err.Error(), nil)
 
 		logger.Error("failed to save session",
 			zap.Error(err),

@@ -8,22 +8,22 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"conformitea/infrastructure/config"
 )
 
 var client *HydraClient
 
-func Initialize(adminURL string) {
+func Initialize(hydraConfigValues config.HydraConfig) (*HydraClient, error) {
+	if err := hydraConfigValues.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid hydra configuration: %w", err)
+	}
+
 	client = &HydraClient{
-		adminURL: adminURL,
+		adminURL: hydraConfigValues.AdminURL,
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
-	}
-}
-
-func GetHydraClient() (*HydraClient, error) {
-	if client == nil {
-		return nil, fmt.Errorf("hydra client was not initialized")
 	}
 
 	return client, nil

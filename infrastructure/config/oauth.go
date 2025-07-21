@@ -1,8 +1,8 @@
-package sections
+package config
 
 import (
 	"errors"
-	"strings"
+	"fmt"
 )
 
 type OAuthConfig struct {
@@ -21,25 +21,25 @@ type MicrosoftOAuthConfig struct {
 }
 
 func (m *MicrosoftOAuthConfig) Validate() error {
-	var errs []string
+	var errs []error
 	if m.ClientID == "" {
-		errs = append(errs, "oauth.microsoft.client_id is required")
+		errs = append(errs, fmt.Errorf("oauth.microsoft.client_id is required"))
 	}
 
 	if m.ClientSecret == "" {
-		errs = append(errs, "oauth.microsoft.client_secret is required")
+		errs = append(errs, fmt.Errorf("oauth.microsoft.client_secret is required"))
 	}
 
 	if m.RedirectURL == "" {
-		errs = append(errs, "oauth.microsoft.redirect_url is required")
+		errs = append(errs, fmt.Errorf("oauth.microsoft.redirect_url is required"))
 	}
 
 	if len(m.Scopes) == 0 {
-		errs = append(errs, "oauth.microsoft.scopes is required and must not be empty")
+		errs = append(errs, fmt.Errorf("oauth.microsoft.scopes is required and must not be empty"))
 	}
 
 	if len(errs) > 0 {
-		return errors.New(strings.Join(errs, "; "))
+		return errors.Join(errs...)
 	}
 
 	return nil

@@ -1,16 +1,18 @@
 package database
 
 import (
-	"conformitea/server/migrations"
+	"database/sql"
 	"errors"
 
+	"conformitea/infrastructure/database/migrations"
+
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
 // Runs all pending migrations automatically
-func RunMigrations() error {
+func RunMigrations(sqlDB *sql.DB) error {
 	// Create migration source from embedded files
 	source, err := iofs.New(migrations.MigrationFiles, ".")
 	if err != nil {
@@ -18,7 +20,7 @@ func RunMigrations() error {
 	}
 
 	// Create database driver
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := pgx.WithInstance(sqlDB, &pgx.Config{})
 	if err != nil {
 		return err
 	}
