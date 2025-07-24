@@ -1,9 +1,10 @@
 package auth
 
 import (
-	"conformitea/server/types"
 	"context"
 	"fmt"
+
+	"conformitea/server/types"
 )
 
 // Process OAuth2 callback
