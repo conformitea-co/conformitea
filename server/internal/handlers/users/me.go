@@ -1,4 +1,4 @@
-package auth
+package users
 
 import (
 	"net/http"
@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UserResponse represents the authenticated user data returned by the me endpoint.
-type UserResponse struct {
+// MeResponse represents the authenticated user data returned by the me endpoint.
+type MeResponse struct {
 	UserID        string `json:"user_id"`
 	Email         string `json:"email"`
 	Name          string `json:"name"`
@@ -19,7 +19,7 @@ type UserResponse struct {
 }
 
 // Me returns the current user's session information.
-func (a *AuthHandlers) Me(c *gin.Context) {
+func (a *UsersHandlers) Me(c *gin.Context) {
 	session := sessions.Default(c)
 
 	// Check if user is authenticated
@@ -45,7 +45,7 @@ func (a *AuthHandlers) Me(c *gin.Context) {
 		return
 	}
 
-	user := UserResponse{
+	user := MeResponse{
 		UserID:        userID,
 		Email:         email,
 		Name:          name,

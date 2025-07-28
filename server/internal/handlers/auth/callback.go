@@ -97,8 +97,6 @@ func (a *AuthHandlers) Callback(c *gin.Context) {
 	session.Set("user_id", result.UserID)
 	session.Set("email", result.Email)
 	session.Set("name", result.Name)
-	session.Set("provider", result.Provider)
-	session.Set("authenticated", true)
 
 	// Clear temporary auth data
 	session.Delete("hydra_login_challenge")
