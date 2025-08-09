@@ -24,15 +24,19 @@ type CallbackRequest struct {
 }
 
 type CallbackResult struct {
-	AccessToken  string
-	RefreshToken string
-	UserID       string
-	Email        string
-	Name         string
-	Provider     string
+	RedirectTo string
+}
+
+type ConsentRequest struct {
+	ConsentChallenge string
+}
+
+type ConsentResult struct {
+	RedirectTo string
 }
 
 type AppAuth interface {
 	InitiateLogin(req LoginRequest) (LoginResult, error)
 	ProcessCallback(ctx context.Context, req CallbackRequest) (CallbackResult, error)
+	ProcessConsent(ctx context.Context, req ConsentRequest) (ConsentResult, error)
 }

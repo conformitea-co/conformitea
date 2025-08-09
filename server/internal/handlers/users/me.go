@@ -22,14 +22,6 @@ type MeResponse struct {
 func (a *UsersHandlers) Me(c *gin.Context) {
 	session := sessions.Default(c)
 
-	// Check if user is authenticated
-	authenticated, exists := session.Get("authenticated").(bool)
-	if !exists || !authenticated {
-		authErr := cerror.NewAuthError(cerror.AuthSessionExpired, nil)
-		c.JSON(authErr.HTTPStatusCode(), authErr)
-		return
-	}
-
 	// Extract user data from session
 	userID, _ := session.Get("user_id").(string)
 	email, _ := session.Get("email").(string)

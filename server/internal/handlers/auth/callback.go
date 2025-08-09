@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"net/http"
 
 	"conformitea/server/internal/cerror"
@@ -78,8 +77,7 @@ func (a *AuthHandlers) Callback(c *gin.Context) {
 		Provider:            provider,
 	}
 
-	ctx := context.Background()
-	result, err := a.appAuth.ProcessCallback(ctx, req)
+	result, err := a.appAuth.ProcessCallback(c.Request.Context(), req)
 	if err != nil {
 		logger.Error("failed to process oauth2 callback", zap.Error(err))
 
@@ -90,13 +88,6 @@ func (a *AuthHandlers) Callback(c *gin.Context) {
 		c.JSON(authErr.HTTPStatusCode(), authErr)
 		return
 	}
-
-	// Store Hydra tokens and user data in session
-	session.Set("access_token", result.AccessToken)
-	session.Set("refresh_token", result.RefreshToken)
-	session.Set("user_id", result.UserID)
-	session.Set("email", result.Email)
-	session.Set("name", result.Name)
 
 	// Clear temporary auth data
 	session.Delete("hydra_login_challenge")
@@ -110,5 +101,5 @@ func (a *AuthHandlers) Callback(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusFound, a.config.General.FrontendURL)
+	c.Redirect(http.StatusFound, result.RedirectTo)
 }

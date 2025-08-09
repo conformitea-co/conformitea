@@ -32,23 +32,17 @@ func (a *Auth) processMicrosoftCallback(ctx context.Context, req types.CallbackR
 		return types.CallbackResult{}, fmt.Errorf("failed to get user profile: %w", err)
 	}
 
-	hydraTokens, err := a.hydraClient.AcceptLoginSession(req.HydraLoginChallenge, userProfile.ID)
+	result, err := a.hydraClient.AcceptLoginSession(req.HydraLoginChallenge, userProfile.ID)
 	if err != nil {
-		return types.CallbackResult{}, fmt.Errorf("failed to accept Hydra login session: %w", err)
+		return types.CallbackResult{}, fmt.Errorf("failed to accept hydra login session: %w", err)
 	}
 
-	// Extract email from profile with fallback
 	email := userProfile.Mail
 	if email == "" {
 		email = userProfile.UserPrincipalName
 	}
 
 	return types.CallbackResult{
-		AccessToken:  hydraTokens.AccessToken,
-		RefreshToken: hydraTokens.RefreshToken,
-		UserID:       userProfile.ID,
-		Email:        email,
-		Name:         userProfile.DisplayName,
-		Provider:     "microsoft",
+		RedirectTo: result.RedirectTo,
 	}, nil
 }

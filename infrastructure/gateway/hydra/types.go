@@ -20,19 +20,14 @@ type HydraLoginSession struct {
 	RequestedScope []string `json:"requested_scope"`
 }
 
-// TokenResponse represents Hydra's OAuth2 token response containing access and refresh tokens.
-type TokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	TokenType    string `json:"token_type"`
-	ExpiresIn    int    `json:"expires_in"`
-}
-
-// AcceptLoginRequest represents the request payload for accepting a Hydra login session.
 type AcceptLoginRequest struct {
 	Subject     string `json:"subject"`
 	Remember    bool   `json:"remember"`
 	RememberFor int    `json:"remember_for"`
+}
+
+type AcceptLoginResponse struct {
+	RedirectTo string `json:"redirect_to"`
 }
 
 // TokenInfo represents the response from Hydra's token introspection endpoint.
@@ -42,4 +37,34 @@ type TokenInfo struct {
 	Exp    int64  `json:"exp"`
 	Iat    int64  `json:"iat"`
 	Scope  string `json:"scope"`
+}
+
+type HydraGetConsentResponse struct {
+	Challenge string `json:"challenge"`
+	Skip      bool   `json:"skip"`
+	Subject   string `json:"subject"`
+	Client    struct {
+		ClientId   string `json:"client_id"`
+		ClientName string `json:"client_name"`
+	} `json:"client"`
+	RequestURL                   string   `json:"request_url"`
+	RequestedScope               []string `json:"requested_scope"`
+	RequestedAccessTokenAudience []string `json:"requested_access_token_audience"`
+}
+
+type HydraConsentSessionTokens struct {
+	AccessToken map[string]any `json:"access_token,omitempty"`
+	IDToken     map[string]any `json:"id_token,omitempty"`
+}
+
+type HydraPutAcceptConsentRequest struct {
+	GrantScope               []string                  `json:"grant_scope"`
+	GrantAccessTokenAudience []string                  `json:"grant_access_token_audience,omitempty"`
+	Remember                 bool                      `json:"remember"`
+	RememberFor              int                       `json:"remember_for"`
+	Session                  HydraConsentSessionTokens `json:"session"`
+}
+
+type HydraPutAcceptConsentResponse struct {
+	RedirectTo string `json:"redirect_to"`
 }

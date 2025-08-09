@@ -11,6 +11,7 @@ import (
 func RegisterRoutes(router *gin.Engine, auth *auth.AuthHandlers, users *users.UsersHandlers) {
 	// Authentication routes
 	router.GET("/auth/callback", auth.Callback)
+	router.GET("/auth/consent", auth.Consent)
 	router.GET("/auth/login", auth.Login)
 	router.POST("/auth/logout", auth.Logout)
 
