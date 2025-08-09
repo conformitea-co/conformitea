@@ -209,7 +209,7 @@ func (c *HydraClient) AcceptConsentSession(consentChallenge string, acceptReq Hy
 
 // RejectConsentSession rejects a Hydra consent session with the specified error.
 func (c *HydraClient) RejectConsentSession(consentChallenge string, errorCode string, errorDescription string) error {
-	rejectReq := map[string]interface{}{
+	rejectReq := map[string]any{
 		"error":             errorCode,
 		"error_description": errorDescription,
 	}
