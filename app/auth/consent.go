@@ -43,7 +43,7 @@ func (a *Auth) buildConsentSession(consentSession *hydra.HydraGetConsentResponse
 		"permissions": []string{"read:profile", "write:profile"},
 	}
 
-	idTokenClaims := map[string]interface{}{
+	idTokenClaims := map[string]any{
 		// Email and name will be populated from database in future
 		// For now, we'll use the subject as a placeholder
 		"sub": consentSession.Subject,
