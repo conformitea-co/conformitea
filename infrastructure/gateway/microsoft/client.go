@@ -2,10 +2,11 @@
 package microsoft
 
 import (
-	"conformitea/infrastructure/config"
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"conformitea/infrastructure/config"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/microsoft"
@@ -56,24 +57,24 @@ func (c *OAuthClient) ExchangeCodeForToken(ctx context.Context, code string) (*o
 }
 
 // Retrieves the user's profile information from Microsoft Graph API.
-func (c *OAuthClient) GetUserProfile(ctx context.Context, token *oauth2.Token) (*MicrosoftUserProfile, error) {
+func (c *OAuthClient) GetUserProfile(ctx context.Context, token *oauth2.Token) (MicrosoftUserProfile, error) {
 	client := c.config.Client(ctx, token)
 
 	resp, err := client.Get("https://graph.microsoft.com/v1.0/me")
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user profile: %w", err)
+		return MicrosoftUserProfile{}, fmt.Errorf("failed to get user profile: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("microsoft Graph API error: status %d", resp.StatusCode)
+		return MicrosoftUserProfile{}, fmt.Errorf("microsoft Graph API error: status %d", resp.StatusCode)
 	}
 
 	var profile MicrosoftUserProfile
 	if err := json.NewDecoder(resp.Body).Decode(&profile); err != nil {
-		return nil, fmt.Errorf("failed to decode user profile: %w", err)
+		return MicrosoftUserProfile{}, fmt.Errorf("failed to decode user profile: %w", err)
 	}
 
-	return &profile, nil
+	return profile, nil
 }

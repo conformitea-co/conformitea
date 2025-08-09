@@ -30,7 +30,7 @@ export const fetcher = async (url: string) => {
 // Type-safe API methods
 export const api = {
   auth: {
-    me: () => fetcher("/auth/me") as Promise<User>,
+    me: () => fetcher("/users/me") as Promise<User>,
     logout: async () => {
       const response = await fetch(`${API_URL}/auth/logout`, {
         method: "POST",

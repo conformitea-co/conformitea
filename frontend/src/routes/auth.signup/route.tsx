@@ -11,8 +11,8 @@ export default function Signup() {
       new URLSearchParams({
         client_id: "microsoft",
         response_type: "code",
-        redirect_uri: `${import.meta.env.VITE_API_URL}/auth/callback`,
-        scope: "openid profile email",
+        redirect_uri: window.location.origin,
+        scope: "offline_access offline openid",
         state: Math.random().toString(36).substring(2, 15),
       });
   };
