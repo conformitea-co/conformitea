@@ -7,6 +7,7 @@ import (
 
 	"conformitea/server/config"
 	"conformitea/server/internal/handlers/auth"
+	"conformitea/server/internal/handlers/users"
 	"conformitea/server/internal/middlewares"
 	"conformitea/server/internal/routes"
 	"conformitea/server/types"
@@ -63,7 +64,8 @@ func Initialize(c config.Config, l *zap.Logger, appAuth types.AppAuth) (types.Se
 	}
 
 	authHandlers := auth.Initialize(appAuth, c)
-	routes.RegisterRoutes(router, authHandlers)
+	usersHandlers := users.Initialize(c)
+	routes.RegisterRoutes(router, authHandlers, usersHandlers)
 
 	return &server{
 		authHandlers: authHandlers,

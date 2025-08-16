@@ -56,6 +56,7 @@ func initializeServer(c cmd.Config) (types.Server, error) {
 
 func initializeApp(dc *domain.Container, ic *infrastructure.Container) *auth.Auth {
 	auth := auth.Initialize(
+		ic.GetDatabase(),
 		dc.GetUserService(),
 		ic.GetMicrosoftClient(),
 		ic.GetHydraClient(),

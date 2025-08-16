@@ -31,13 +31,11 @@ func (a *AuthHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	logger.Info("login initiated",
-		zap.String("login_challenge", loginChallenge),
-	)
+	logger.Info("login initiated", zap.String("login_challenge", loginChallenge))
 
 	result, err := a.appAuth.InitiateLogin(types.LoginRequest{LoginChallenge: loginChallenge})
 	if err != nil {
-		authErr := cerror.NewAuthErrorWithMessage(cerror.AuthSessionCreateFailed, err.Error(), map[string]interface{}{
+		authErr := cerror.NewAuthErrorWithMessage(cerror.AuthSessionCreateFailed, err.Error(), map[string]any{
 			"login_challenge": loginChallenge,
 		})
 
