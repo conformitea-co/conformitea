@@ -4,8 +4,13 @@ import "net/http"
 
 // HydraClient represents a Hydra admin API client for managing OAuth2 sessions and tokens.
 type HydraClient struct {
-	adminURL   string
-	httpClient *http.Client
+	adminURL              string
+	publicURL             string
+	redirectURL           string
+	httpClient            *http.Client
+	jwtParser             *JWTParser
+	microsoftClientID     string
+	microsoftClientSecret string
 }
 
 // HydraLoginSession represents a Hydra OAuth2 login session request.
@@ -67,4 +72,14 @@ type HydraPutAcceptConsentRequest struct {
 
 type HydraPutAcceptConsentResponse struct {
 	RedirectTo string `json:"redirect_to"`
+}
+
+// TokenExchangeResponse represents the response from Hydra's token endpoint
+type TokenExchangeResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	IDToken      string `json:"id_token,omitempty"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
+	Scope        string `json:"scope"`
 }

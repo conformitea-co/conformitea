@@ -30,7 +30,6 @@ export const fetcher = async (url: string) => {
 // Type-safe API methods
 export const api = {
   auth: {
-    me: () => fetcher("/users/me") as Promise<User>,
     logout: async () => {
       const response = await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
@@ -40,6 +39,23 @@ export const api = {
       if (!response.ok) {
         throw new ApiError(response.status, response.statusText);
       }
+    },
+    createSession: async (code: string, state?: string) => {
+      const response = await fetch(`${API_URL}/auth/session`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code, state }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new ApiError(response.status, error.message || response.statusText);
+      }
+
+      return response.json();
     },
   },
 };

@@ -10,7 +10,7 @@ import { ApiError, fetcher } from "@/lib/api";
 export function useUser() {
   const { setUser, clearUser } = useAuthStore();
 
-  const { data, error, isLoading, mutate } = useSWR<User>("/auth/me", fetcher, {
+  const { data, error, isLoading, mutate } = useSWR<User>("/api/users/me", fetcher, {
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
     shouldRetryOnError: (error) => {
@@ -31,6 +31,8 @@ export function useUser() {
       clearUser();
     }
   }, [data, error, setUser, clearUser]);
+
+  console.log(data, isLoading, error)
 
   return {
     user: data,

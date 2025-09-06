@@ -1,6 +1,3 @@
-[general]
-frontend_url = "http://localhost:5173"
-
 [server]
 port = "8080"
 
@@ -32,6 +29,11 @@ password = "redis"
 [hydra]
 admin_url = "http://hydra:4445"
 public_url = "http://hydra:4444"
+redirect_url = "http://localhost:5173/auth/callback"
+
+[hydra.microsoft]
+client_id = "microsoft"
+client_secret = "you-must-replace-it" # openssl rand -hex 32
 
 [oauth.microsoft]
 client_id = "your_microsoft_client_id"
