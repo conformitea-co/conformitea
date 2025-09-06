@@ -9,7 +9,6 @@ import (
 	"conformitea/server/internal/handlers/auth"
 	"conformitea/server/internal/handlers/users"
 	"conformitea/server/internal/middlewares"
-	"conformitea/server/internal/routes"
 	"conformitea/server/types"
 
 	"github.com/gin-gonic/gin"
@@ -17,10 +16,9 @@ import (
 )
 
 type server struct {
-	authHandlers *auth.AuthHandlers
-	logger       *zap.Logger
-	router       *gin.Engine
-	config       config.Config
+	logger *zap.Logger
+	router *gin.Engine
+	config config.Config
 }
 
 func (s *server) Start() error {
@@ -52,25 +50,28 @@ func (s *server) Start() error {
 	return nil
 }
 
-func Initialize(c config.Config, l *zap.Logger, appAuth types.AppAuth) (types.Server, error) {
-	if err := c.Validate(); err != nil {
+func Initialize(config config.Config, logger *zap.Logger, appAuth types.AppAuth) (types.Server, error) {
+	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid server configuration: %w", err)
 	}
 
 	router := gin.New()
 
-	if err := middlewares.RegisterMiddlewares(router, l, c); err != nil {
+	if err := middlewares.RegisterCommonMiddlewares(router, logger, config); err != nil {
 		return nil, fmt.Errorf("failed to register middlewares: %w", err)
 	}
 
-	authHandlers := auth.Initialize(appAuth, c)
-	usersHandlers := users.Initialize(c)
-	routes.RegisterRoutes(router, authHandlers, usersHandlers)
+	authGroup := router.Group("/auth")
+	apiGroup := router.Group("/api")
+
+	middlewares.RegisterAPIGroupMiddlewares(apiGroup, appAuth)
+
+	auth.Initialize(authGroup, appAuth, config)
+	users.Initialize(apiGroup, config)
 
 	return &server{
-		authHandlers: authHandlers,
-		logger:       l,
-		router:       router,
-		config:       c,
+		logger: logger,
+		router: router,
+		config: config,
 	}, nil
 }

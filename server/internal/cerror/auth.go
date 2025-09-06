@@ -34,6 +34,8 @@ const (
 	AuthTokenIntrospectFailed = "CT_AUTH_008"
 	AuthSessionExpired        = "CT_AUTH_009"
 	AuthInvalidToken          = "CT_AUTH_010"
+	AuthInvalidRequest        = "CT_AUTH_011"
+	AuthTokenExchangeFailed   = "CT_AUTH_012"
 )
 
 // NewAuthError creates a new AuthError with the specified code and optional details.
@@ -56,11 +58,11 @@ func NewAuthErrorWithMessage(code, message string, details map[string]interface{
 // HTTPStatusCode returns the appropriate HTTP status code for the error.
 func (e *AuthError) HTTPStatusCode() int {
 	switch e.Code {
-	case AuthInvalidState, AuthProviderNotSupported:
+	case AuthInvalidState, AuthProviderNotSupported, AuthInvalidRequest:
 		return http.StatusBadRequest
 	case AuthSessionNotFound, AuthSessionExpired, AuthInvalidToken:
 		return http.StatusUnauthorized
-	case AuthMicrosoftExchange, AuthMicrosoftProfile, AuthHydraAcceptFailed:
+	case AuthMicrosoftExchange, AuthMicrosoftProfile, AuthHydraAcceptFailed, AuthTokenExchangeFailed:
 		return http.StatusBadGateway
 	case AuthSessionCreateFailed, AuthTokenIntrospectFailed:
 		return http.StatusInternalServerError

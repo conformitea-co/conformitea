@@ -3,10 +3,13 @@ package hydra
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"conformitea/infrastructure/config"
@@ -19,11 +22,28 @@ func Initialize(hydraConfigValues config.HydraConfig) (*HydraClient, error) {
 		return nil, fmt.Errorf("invalid hydra configuration: %w", err)
 	}
 
+	// Create HTTP client
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	// Derive JWKS URL from the public URL (e.g., https://hydra.example/.well-known/jwks.json)
+	jwksURL := strings.TrimRight(hydraConfigValues.PublicURL, "/") + "/.well-known/jwks.json"
+
+	// Create JWKS-backed JWT parser
+	jwtParser, err := NewJWTParserFromURL(jwksURL, httpClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize JWKS parser: %w", err)
+	}
+
 	client = &HydraClient{
-		adminURL: hydraConfigValues.AdminURL,
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		adminURL:              hydraConfigValues.AdminURL,
+		publicURL:             hydraConfigValues.PublicURL,
+		redirectURL:           hydraConfigValues.RedirectURL,
+		httpClient:            httpClient,
+		jwtParser:             jwtParser,
+		microsoftClientID:     hydraConfigValues.Microsoft.ClientID,
+		microsoftClientSecret: hydraConfigValues.Microsoft.ClientSecret,
 	}
 
 	return client, nil
@@ -123,6 +143,76 @@ func (c *HydraClient) RejectLoginSession(loginChallenge, errorCode string) error
 	}
 
 	return nil
+}
+
+// ExchangeAuthorizationCode exchanges an OAuth2 authorization code for tokens
+func (c *HydraClient) ExchangeAuthorizationCode(code string) (*TokenExchangeResponse, error) {
+	// Token exchange should happen with the public endpoint
+	tokenURL := fmt.Sprintf("%s/oauth2/token", c.publicURL)
+
+	// Prepare form data for authorization code grant
+	data := url.Values{}
+	data.Set("grant_type", "authorization_code")
+	data.Set("code", code)
+	// include client_id in the body for clarity; primary auth is via HTTP Basic
+	data.Set("client_id", c.microsoftClientID)
+	data.Set("redirect_uri", c.redirectURL)
+
+	req, err := http.NewRequest("POST", tokenURL, strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create token request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Add HTTP Basic auth header using client credentials
+	creds := c.microsoftClientID + ":" + c.microsoftClientSecret
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(creds)))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to exchange authorization code: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("hydra token exchange error: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var tokenResp TokenExchangeResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+		return nil, fmt.Errorf("failed to decode token response: %w", err)
+	}
+
+	return &tokenResp, nil
+}
+
+// ParseJWT parses and validates a JWT token using the loaded public key
+func (c *HydraClient) ParseJWT(tokenString string) (map[string]interface{}, error) {
+	if c.jwtParser == nil {
+		return nil, fmt.Errorf("JWT parser not initialized")
+	}
+
+	claims, err := c.jwtParser.ParseAndValidateJWT(tokenString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse JWT: %w", err)
+	}
+
+	return claims, nil
+}
+
+// ParseJWTWithoutValidation parses a JWT without validating the signature
+func (c *HydraClient) ParseJWTWithoutValidation(tokenString string) (map[string]interface{}, error) {
+	if c.jwtParser == nil {
+		return nil, fmt.Errorf("JWT parser not initialized")
+	}
+
+	claims, err := c.jwtParser.ParseJWTWithoutValidation(tokenString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse JWT: %w", err)
+	}
+
+	return claims, nil
 }
 
 // IntrospectToken validates an OAuth2 token with Hydra's introspection endpoint.

@@ -11,7 +11,7 @@ export default function Signup() {
       new URLSearchParams({
         client_id: "microsoft",
         response_type: "code",
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/auth/callback`,
         scope: "offline_access offline openid",
         state: Math.random().toString(36).substring(2, 15),
       });

@@ -13,6 +13,9 @@ type Pages = {
   "/": {
     params: {};
   };
+  "/auth/callback": {
+    params: {};
+  };
   "/auth/signup": {
     params: {};
   };
@@ -27,7 +30,11 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/auth/signup" | "/dashboard" | "/brand";
+    page: "/" | "/auth/callback" | "/auth/signup" | "/dashboard" | "/brand";
+  };
+  "routes/auth.callback/route.tsx": {
+    id: "routes/auth.callback";
+    page: "/auth/callback";
   };
   "routes/auth.signup/route.tsx": {
     id: "routes/auth.signup";
